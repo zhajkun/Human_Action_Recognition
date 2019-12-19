@@ -1,0 +1,17 @@
+# Configurations for Human Action Recognition Project
+# Version 1: Define action classes, I/O format
+
+# zhaj
+
+# Classes of the actions.
+Classes: ['standing', 'walk_to_me', 'walk_away', 'wave', 'put_in_basket', 'undefined', 'reserve']
+
+# general settings:
+Settings:
+# openpose settings:
+  tf_open_pose:
+   Model: cmu
+   Image_Size: 432x368
+
+
+
