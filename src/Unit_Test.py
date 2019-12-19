@@ -88,3 +88,4 @@ def Simple_Spilt():
 # -- Main
 if __name__ == "__main__":
     Test_Save_Raw_Skeleton_Data_v1()
+    Simple_Spilt(9)
