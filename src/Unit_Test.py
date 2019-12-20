@@ -59,14 +59,14 @@ def Test_Save_Raw_Skeleton_Data_v1():
 
 
         
-        if Lists_To_Save:
+        if Lists_To_Save: #only save no-empty lists 
             txt_filename = SKELETON_FILENAME_FORMAT.format(i)
             uti_commons.save_listlist(SKELETONS_FOLDER + txt_filename, Lists_To_Save)
             print(f"Saved {i}th Skeleton Data from Webcam...")
             jpg_filename = IMG_FILENAME_FORMAT.format(i)
             cv2.imwrite(
-            DST_VIZ_IMGS_FOLDER + jpg_filename,
-            Image_Output)
+            DST_VIZ_IMGS_FOLDER + jpg_filename, Image_Output)
+            print(f"Saved {i}th Image with Skeleton Data from Webcam...")
 
         
         ''' Split it into x- and y- coordinates
@@ -93,8 +93,7 @@ def Simple_Spilt():
     even = l[1::2]
     print(even)
 
-def Test_Save_Raw_Skeleton_Data_v2():
-    Data_Source = ''
+
 
 
 # -- Main

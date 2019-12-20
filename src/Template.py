@@ -21,7 +21,7 @@ import sys
 # […]
 
 # Own modules
-from {path} import {class}
+# from {path} import {class}
 # […]
 
 __author__ = '{author}'

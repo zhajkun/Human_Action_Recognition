@@ -196,7 +196,7 @@ def test_openpose_on_webcamera():
     img_displayer = Image_Displayer()
     
     # -- Initialize openpose detector    
-    skeleton_detector = SkeletonDetector("mobilenet_thin", "432x368")
+    skeleton_detector = Skeleton_Detector("mobilenet_thin", "432x368")
 
     # -- Read image and detect
     import itertools
