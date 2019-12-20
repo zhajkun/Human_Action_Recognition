@@ -51,13 +51,22 @@ def Test_Save_Raw_Skeleton_Data_v1():
         Image_Window.display(Image_Output)
         Lists_To_Save, Scale_h = Skeleton_Detector.humans_to_skels_list(Detected_Human)
         
-        
+        # Temporal path and format, use config.yaml file to define it later.
         SKELETONS_FOLDER = ('/home/zhaj/tf_test/Human_Action_Recognition/Temp_Skeletons/')
+        DST_VIZ_IMGS_FOLDER = ('/home/zhaj/tf_test/Human_Action_Recognition/Temp_Images/')
         SKELETON_FILENAME_FORMAT = ('{:05d}.txt')
-        filename = SKELETON_FILENAME_FORMAT.format(i)
+        IMG_FILENAME_FORMAT = ('{:05d}.jpg')
+
+
+        
         if Lists_To_Save:
-            uti_commons.save_listlist(SKELETONS_FOLDER + filename, Lists_To_Save)
+            txt_filename = SKELETON_FILENAME_FORMAT.format(i)
+            uti_commons.save_listlist(SKELETONS_FOLDER + txt_filename, Lists_To_Save)
             print(f"Saved {i}th Skeleton Data from Webcam...")
+            jpg_filename = IMG_FILENAME_FORMAT.format(i)
+            cv2.imwrite(
+            DST_VIZ_IMGS_FOLDER + jpg_filename,
+            Image_Output)
 
         
         ''' Split it into x- and y- coordinates
