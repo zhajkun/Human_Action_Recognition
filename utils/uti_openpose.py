@@ -1,9 +1,23 @@
 # !interpreter [optional-arg]
 # -*- coding: utf-8 -*-
-# Version 
+# Version 1
 
 """
-{Description}
+{
+    This Module defines functions for processing skeletons data with tf-openpose
+    Some of the functions are copied from 'tf-openpose-estimation' and modified.
+    
+    Main classes and functions:
+
+    Read:
+        class Read_Images_From_Folder
+        class Read_Images_From_Video
+        class Read_Images_From_Webcam
+    Write:
+        class Video_Writer
+        class Images_Writer
+    
+}
 {License_info}
 """
 
@@ -59,37 +73,37 @@ def _set_config():
     config.gpu_options.per_process_gpu_memory_fraction=MAX_FRACTION_OF_GPU_TO_USE
     return config
 
-def _get_input_img_size_from_string(image_size_str):
+def _iGet_Input_Image_Size_From_String(sImage_Size):
     ''' If input image_size_str is "123x456", then output (123, 456) '''
-    width, height = map(int, image_size_str.split('x'))
-    if width % 16 != 0 or height % 16 != 0:
+    iWidth, iHeight = map(int, sImage_Size.split('x'))
+    if iWidth % 16 != 0 or iHeight % 16 != 0:
         raise Exception('Width and height should be multiples of 16. w=%d, h=%d' % (width, height))
-    return int(width), int(height)
+    return int(iWidth), int(iHeight)
 
 
 
 # -- Main class
 
-class SkeletonDetector(object):
+class Skeleton_Detector(object):
     # This class is mainly copied from https://github.com/ildoonet/tf-pose-estimation
 
-    def __init__(self, model="cmu", image_size="432x368"):
+    def __init__(self, sModel="cmu", sImage_Size="432x368"):
         ''' Arguments:
-            model {str}: "cmu" or "mobilenet_thin".        
-            image_size {str}: resize input images before they are processed. 
+            sModel {str}: "cmu" or "mobilenet_thin".        
+            sImage_size {str}: resize input images before they are processed. 
                 Recommends : 432x368, 336x288, 304x240, 656x368, 
         '''
         # -- Check input
-        assert(model in ["mobilenet_thin", "cmu"])
-        self._w, self._h = _get_input_img_size_from_string(image_size)
+        assert(sModel in ["mobilenet_thin", "cmu"])
+        self._iW, self._iH = _iGet_Input_Image_Size_From_String(sImage_Size)
         
         # -- Set up openpose model
-        self._model = model
+        self._sModel = sModel
         self._resize_out_ratio = 4.0 # Resize heatmaps before they are post-processed. If image_size is small, this should be large.
         self._config = _set_config()
         self._tf_pose_estimator = TfPoseEstimator(
-            get_graph_path(self._model), 
-            target_size=(self._w, self._h),
+            get_graph_path(self._sModel), 
+            target_size=(self._iW, self._iH),
             tf_config=self._config)
         self._prev_t = time.time()
         self._cnt_image = 0
@@ -124,7 +138,7 @@ class SkeletonDetector(object):
 
         # Do inference
         humans = self._tf_pose_estimator.inference(
-            image, resize_to_default=(self._w > 0 and self._h > 0),
+            image, resize_to_default=(self._iW > 0 and self._iH > 0),
             upsample_size=self._resize_out_ratio)
 
         # Print result and time cost
@@ -171,7 +185,7 @@ class SkeletonDetector(object):
                 skeleton[2*idx]=body_part.x
                 skeleton[2*idx+1]=body_part.y * scale_h
             skeletons.append(skeleton)
-        return skeletons 
+        return skeletons, scale_h
 
    
 def test_openpose_on_webcamera():

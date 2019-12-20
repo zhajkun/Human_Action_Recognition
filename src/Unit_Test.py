@@ -37,28 +37,27 @@ def Test_Save_Raw_Skeleton_Data_v1():
     iCamera_Index = 0
     Data_Source = uti_images_io.Read_Images_From_Webcam(fMax_Framerate,iCamera_Index)
     Image_Window = uti_images_io.Image_Displayer()
-    Skeleton_Detector = uti_openpose.SkeletonDetector("mobilenet_thin", "432x368")
+    Skeleton_Detector = uti_openpose.Skeleton_Detector("mobilenet_thin", "432x368")
     import itertools
     for i in itertools.count():
         img = Data_Source.Read_Image()
-        iImage_Counter = 1
         if img is None:
             break
-        print(f"Read {i}th image...")
+        print(f"Read {i}th Frame from Webcam...")
 
         Detected_Human = Skeleton_Detector.detect(img)
         Image_Output = img.copy()
         Skeleton_Detector.draw(Image_Output, Detected_Human)
         Image_Window.display(Image_Output)
-        Lists_To_Save = Skeleton_Detector.humans_to_skels_list(Detected_Human)
+        Lists_To_Save, Scale_h = Skeleton_Detector.humans_to_skels_list(Detected_Human)
         
         
         SKELETONS_FOLDER = ('/home/zhaj/tf_test/Human_Action_Recognition/Temp_Skeletons/')
         SKELETON_FILENAME_FORMAT = ('{:05d}.txt')
         filename = SKELETON_FILENAME_FORMAT.format(i)
-        uti_commons.save_listlist(
-            SKELETONS_FOLDER + filename,
-            Lists_To_Save)
+        if Lists_To_Save:
+            uti_commons.save_listlist(SKELETONS_FOLDER + filename, Lists_To_Save)
+            print(f"Saved {i}th Skeleton Data from Webcam...")
 
         
         ''' Split it into x- and y- coordinates
@@ -85,7 +84,11 @@ def Simple_Spilt():
     even = l[1::2]
     print(even)
 
+def Test_Save_Raw_Skeleton_Data_v2():
+    Data_Source = ''
+
+
 # -- Main
 if __name__ == "__main__":
     Test_Save_Raw_Skeleton_Data_v1()
-    Simple_Spilt(9)
+   
