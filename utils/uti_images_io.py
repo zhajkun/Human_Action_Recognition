@@ -21,7 +21,7 @@
 """
 
 # Futures
-from __future__ import print_function
+
 # […]
 
 # Built-in/Generic Imports
@@ -83,7 +83,7 @@ class Read_Images_From_Video(object):
             iSample_Interval {int}: sample every kth image.
         '''
         if not os.path.exists(sVideo_Path):
-            raise IOError("Video not exist: " + sVideo_Path)
+            raise IOError("Video does not exist: " + sVideo_Path)
         assert isinstance(iSample_Interval, int) and iSample_Interval >= 1
         self.iImages_Counter = 0
         self._bIs_Stoped = False
@@ -288,7 +288,7 @@ class Image_Displayer(object):
     ''' A simple wrapper of using cv2.imshow to display image '''
 
     def __init__(self):
-        self._sWindow_Name = "cv2_display_window"
+        self._sWindow_Name = "CV2_Display_Window"
         cv2.namedWindow(self._sWindow_Name)
 
     def display(self, Image, Wait_Key_ms=1):
@@ -311,7 +311,7 @@ def test_Read_From_Webcam():
         print(f"Read {i}th image...")
         local_Image_Displayer.display(Image)
     print("Program ends")
-'''
+
 def test_Read_From_Video():
 
     # Get Sources from class Read_From_Video
@@ -327,7 +327,7 @@ def test_Read_From_Video():
         print(f"Read {i}th image...")
         local_Image_Displayer.display(Image)
     print("Program ends")
-'''
+
 
 
 

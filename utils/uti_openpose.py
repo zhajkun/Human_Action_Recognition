@@ -9,20 +9,17 @@
     
     Main classes and functions:
 
-    Read:
-        class Read_Images_From_Folder
-        class Read_Images_From_Video
-        class Read_Images_From_Webcam
-    Write:
-        class Video_Writer
-        class Images_Writer
+    Classes:
+        class Skeleton_Detector
+    Functions:
+        def -set
     
 }
 {License_info}
 """
 
 # Futures
-from __future__ import print_function
+
 # […]
 
 # Built-in/Generic Imports
@@ -106,7 +103,7 @@ class Skeleton_Detector(object):
             target_size=(self._iW, self._iH),
             tf_config=self._config)
         self._prev_t = time.time()
-        self._cnt_image = 0
+        self._iImage_Counter = 0
         
         # -- Set logger
         self._logger = _set_logger()
@@ -119,18 +116,18 @@ class Skeleton_Detector(object):
         Returns:
             humans {list of class Human}: 
                 `class Human` is defined in 
-                "src/githubs/tf-pose-estimation/tf_pose/estimator.py"
+                "/home/zhaj/tf-pose-estimation/tf_pose/estimator.py"
                 
                 The variable `humans` is returned by the function
                 `TfPoseEstimator.inference` which is defined in
-                `src/githubs/tf-pose-estimation/tf_pose/estimator.py`.
+                `/home/zhaj/tf-pose-estimation/tf_pose/estimator.py`.
 
                 I've written a function `self.humans_to_skels_list` to 
-                extract the skeleton from this `class Human`. 
+                extract the skeleton from this `class Human` and save the coordinate of x- and y- axis sepratly. 
         '''
 
-        self._cnt_image += 1
-        if self._cnt_image == 1:
+        self._iImage_Counter += 1
+        if self._iImage_Counter == 1:
             self._image_h = image.shape[0]
             self._image_w = image.shape[1]
             self._scale_h = 1.0 * self._image_h / self._image_w
@@ -158,7 +155,7 @@ class Skeleton_Detector(object):
             cv2.putText(img_disp,
                         "fps = {:.1f}".format( (1.0 / (time.time() - self._prev_t) )),
                         (10, 30),  cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (255, 0, 255), 2)
+                        (0, 0, 255), 2)
         self._prev_t = time.time()
 
     def humans_to_skels_list(self, humans, scale_h = None): 
@@ -173,23 +170,41 @@ class Skeleton_Detector(object):
             scale_h {float}: The resultant height(y coordinate) range.
                 The x coordinate is between [0, 1].
                 The y coordinate is between [0, scale_h]
+            Changes:
+            skeletons_x {list of lists}: a list of skeletons of x- axis.
+            skeletons_y {list of lists}: a list of skeletons of y- axis.
         '''
+        # if scale_h is None:
+        #     scale_h = self._scale_h
+        # skeletons = []
+        # NaN = 0
+        # for human in humans:
+        #     skeleton = [NaN]*(18*2)
+        #     for i, body_part in human.body_parts.items(): # iterate dict
+        #         idx = body_part.part_idx
+        #         skeleton[2*idx]=body_part.x
+        #         skeleton[2*idx+1]=body_part.y * scale_h
+        #     skeletons.append(skeleton)
+        # return skeletons, scale_h
         if scale_h is None:
             scale_h = self._scale_h
-        skeletons = []
+        skeletons_x = []
+        skeletons_y = []
         NaN = 0
         for human in humans:
-            skeleton = [NaN]*(18*2)
+            skeleton_x = [NaN]*(18*1)
+            skeleton_y = [NaN]*(18*1)
             for i, body_part in human.body_parts.items(): # iterate dict
                 idx = body_part.part_idx
-                skeleton[2*idx]=body_part.x
-                skeleton[2*idx+1]=body_part.y * scale_h
-            skeletons.append(skeleton)
-        return skeletons, scale_h
+                skeleton_x[idx]=body_part.x
+                skeleton_y[idx]=body_part.y * scale_h
+            skeletons_x.append(skeleton_x)
+            skeletons_y.append(skeleton_y)
+        return skeletons_x, skeletons_y, scale_h
 
-   
+     
 def test_openpose_on_webcamera():
-    
+    '''Tess the fuctions on Web_Cam'''
     # -- Initialize web camera reader
     from utils.uti_images_io import Read_Images_From_Webcam, Image_Displayer
     Webcam_Reader = Read_Images_From_Webcam(fMax_Framerate=10)

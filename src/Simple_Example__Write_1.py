@@ -3,10 +3,12 @@
 # Version 1: Add the function to write the skeleton data
 
 """
-{A simple programm, extended from run.py from tf-openpose project. Just to test the syntax of using tf-openpose. The skeleton data 
-will be store in filepath = '/home/zhaj/tf_test/Test/Skeleton_Data'. Test the programm using:
-python run.py --model=mobilenet_thin --resize=432x368 --image=./images/p1.jpg
-where 'p1.jpg' is the name of input image.}
+{
+    A simple programm, extended from run.py from tf-openpose project. Just to test the syntax of using tf-openpose. The skeleton data 
+    will be store in filepath = '/home/zhaj/tf_test/Test/Skeleton_Data'. Test the programm using:
+    python run.py --model=mobilenet_thin --resize=432x368 --image=./images/p1.jpg
+    where 'p1.jpg' is the name of input image.
+}
 
 {}
 """

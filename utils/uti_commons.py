@@ -8,7 +8,6 @@
 """
 
 # Futures
-from __future__ import print_function
 # […]
 
 # Built-in/Generic Imports
@@ -44,10 +43,21 @@ def read_listlist(filepath):
     ''' Read a list of lists from file '''
     with open(filepath, 'r') as f:
         ll = simplejson.load(f)
-        return ll
 
+    return ll
 
+def saveliststofile(filepath, ll):
+    folder_path = os.path.dirname(filepath)
+    os.makedirs(folder_path, exist_ok=True)
+    with open(filepath, 'w') as f:
+        for item in ll:
+            f.write("%s\n" % item)
 
-
+def readlists_nosimp(filepath):
+    ''' Read a list of lists from file '''
+    with open(filepath, 'r') as f:
+       # ll = simplejson.load(f)
+       ll = f.read().splitlines()
+    return ll
 
 

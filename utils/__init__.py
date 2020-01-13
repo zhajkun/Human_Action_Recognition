@@ -3,6 +3,8 @@
 # Version 
 
 """
-{Initial File for subfolder 'utils', add thism folder to module}
+{
+    Initial File for subfolder 'utils', add this folder to module
+}
 {License_info}
 """

@@ -1,14 +1,16 @@
 # !interpreter [optional-arg]
 # -*- coding: utf-8 -*-
-# Version 
+# Version
 
 """
-{Description}
+{
+    Description
+}
 {License_info}
 """
 
 # Futures
-from __future__ import print_function
+
 # […]
 
 # Built-in/Generic Imports
