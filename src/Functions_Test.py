@@ -22,6 +22,7 @@ import sys
 import numpy as np 
 import cv2
 import simplejson
+import json
 # […]
 
 # Own modules
@@ -183,6 +184,55 @@ def Test_Velocity():
     #res = uti_skeletons_io.Cauculate_Skeleton_Velocity(s1,s2)
     print(type(s1))
 # -- Main
+
 if __name__ == "__main__":
-    Test_Save_Raw_Skeleton_Data_v1()
-   
+    # with open(ROOT + 'config/config.json') as json_data_file:
+    #     cfg_all = json.load(json_data_file)
+    #     cfg = cfg_all["Video_Recorder.py"]
+
+    #     CLASSES = np.array(cfg_all["classes"])
+    #     SKELETON_FILE_NAME_FORMAT = cfg_all["SKELETON_FILE_NAME_FORMAT"]
+    #     print(CLASSES)
+    #     print(SKELETON_FILE_NAME_FORMAT)
+
+    cap = cv2.VideoCapture(0)
+
+    while(cap.isOpened()):
+        ret, frame = cap.read()
+
+        
+
+        cv2.imshow('frame',frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+
+
+    # cap = cv2.VideoCapture(0)
+
+    # # Define the codec and create VideoWriter object
+    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    # out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
+
+    # while(cap.isOpened()):
+    #     ret, frame = cap.read()
+    #     if ret==True:
+    #         frame = cv2.flip(frame,0)
+
+    #         # write the flipped frame
+    #         out.write(frame)
+
+    #         cv2.imshow('frame',frame)
+    #         if cv2.waitKey(1) & 0xFF == ord('q'):
+    #             break
+    #     else:
+    #         break
+
+    # # Release everything if job is finished
+    # cap.release()
+    # out.release()
+    # cv2.destroyAllWindows()

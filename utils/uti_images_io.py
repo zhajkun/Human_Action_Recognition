@@ -198,7 +198,7 @@ class Video_Writer(object):
         ''' Read images from web camera, call as module.
         Argument:
             sVideo_Path {string}: The path of the folder.
-            fFramerate {float}: index of the web camera. It should be 0 by default.
+            fFramerate {intenger}: Frame rate of the recorded video web camera.
         '''
 
         # -- Settings
@@ -208,7 +208,7 @@ class Video_Writer(object):
         # -- Variables
         self._iImages_Counter = 0
         # initialize later when the 1st image comes
-        self._Video_Writer = None
+        self._video_writer = None
         self._Width = None
         self._Height = None
 
@@ -218,22 +218,22 @@ class Video_Writer(object):
             os.makedirs(sFolder)
             sVideo_Path
 
-    def Write(self, Image):
+    def write(self, Image):
         self._iImages_Counter += 1
         if self._iImages_Counter == 1:  # initialize the video writer
             fourcc = cv2.VideoWriter_fourcc(*'XVID')  # define the codec
             self._Width = Image.shape[1]
             self._Height = Image.shape[0]
-            self._Video_Writer = cv2.VideoWriter(
+            self._video_writer = cv2.VideoWriter(
                 self._sVideo_Path, fourcc, self._fFramerate, (self._Width, self._Height))
-        self._Video_Writer.Write(Image)
+        self._video_writer.write(Image)
 
     def Stop(self):
         self.__del__()
 
     def __del__(self):
         if self._iImages_Counter > 0:
-            self._Video_Writer.release()
+            self._video_writer.release()
             print("Complete writing {}fps and {}s video to {}".format(
                 self._fFramerate, self._iImages_Counter/self._fFramerate, self._sVideo_Path))
 
@@ -253,7 +253,7 @@ class Images_Writer(object):
         # -- Variables
         self._iImages_Counter = 0
         # initialize later when the 1st image comes
-        self._Video_Writer = None
+        self._video_writer = None
         self._Width = None
         self._Height = None
 
@@ -269,16 +269,16 @@ class Images_Writer(object):
             fourcc = cv2.VideoWriter_fourcc(*'XVID')  # define the codec
             self._Width = Image.shape[1]
             self._Height = Image.shape[0]
-            self._Video_Writer = cv2.VideoWriter(
+            self._video_writer = cv2.VideoWriter(
                 self._sVideo_Path, fourcc, self._fFramerate, (self._Width, self._Height))
-        self._Video_Writer.Write(Image)
+        self._video_writer.Write(Image)
 
     def Stop(self):
         self.__del__()
 
     def __del__(self):
         if self._iImages_Counter > 0:
-            self._Video_Writer.release()
+            self._video_writer.release()
             print("Complete writing {}fps and {}s video to {}".format(
                 self._fFramerate, self._iImages_Counter/self._fFramerate, self._sVideo_Path))
 
@@ -315,7 +315,7 @@ def test_Read_From_Webcam():
 def test_Read_From_Video():
 
     # Get Sources from class Read_From_Video
-    sVideo_Path = '/home/zhaj/tf_test/Realtime-Action-Recognition-master/data_test'
+    sVideo_Path = '/home/zhaj/tf_test/Realtime-Action-Recognition-master/output/01-10-15-16-44-054/'
     iSample_Interval = 1
     Images_From_Video = Read_Images_From_Video(sVideo_Path, iSample_Interval)
     local_Image_Displayer = Image_Displayer()
@@ -332,6 +332,6 @@ def test_Read_From_Video():
 
 
 if __name__ == "__main__":
-    test_Read_From_Webcam()
+    test_Read_From_Folder()
 
 

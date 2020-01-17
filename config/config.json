@@ -1,0 +1,33 @@
+{
+    "classes":[
+      "STANDING",
+      "WALK_TO_ME",
+      "WALKING",
+      "WAVING",
+      "PUT_IN_BASKET",
+      "UNDEFINED",
+      "RESERVED"
+    ],
+
+    "IMAGE_FILE_NAME_FORMAT": "{:05d}.jpg",
+    "SKELETON_FILE_NAME_FORMAT": "{:05d}.txt",
+    "VIDEO_FILE_NAME_FORMAT": "{:05d}.avi",
+
+    "Images_Recorder.py": 
+    {
+
+      "input": 
+      {
+
+      },
+      "output": 
+      {
+        "Video_Info_Txt": "data_proc/raw_skeletons/images_info.txt",
+        "RECORDED_IMAGES_FOLDER": "data/Data_Images/"
+      }
+    }
+
+
+
+ 
+  }
