@@ -1,5 +1,6 @@
 {
-    "classes":[
+    "classes":
+    [
       "STANDING",
       "WALK_TO_ME",
       "WALKING",
@@ -12,21 +13,41 @@
     "IMAGE_FILE_NAME_FORMAT": "{:05d}.jpg",
     "SKELETON_FILE_NAME_FORMAT": "{:05d}.txt",
     "VIDEO_FILE_NAME_FORMAT": "{:05d}.avi",
+    "TF_OPENPOSE_LOCATION": "/home/zhaj/tf-pose-estimation",
 
     "Images_Recorder.py": 
     {
 
       "input": 
       {
-
+        "RESERVED": "RESERVED"
       },
       "output": 
       {
-        "Video_Info_Txt": "data_proc/raw_skeletons/images_info.txt",
         "RECORDED_IMAGES_FOLDER": "data/Data_Images/"
       }
-    }
+    },
 
+    "s1_get_skeletons_data.py":
+    {
+
+      "openpose":
+      {
+        "MODEL": "cmu",
+        "IMAGE_SIZE": "656x368"
+      },
+      "input":
+      {
+        "IMAGES_LIST": "data/Data_Images/valid_images.txt",
+        "TRAINING_IMAGES_FOLDER": "data/Data_Images/"
+      },
+      "output":
+      {
+        "DETECTED_SKELETONS_FOLDER": "data_proc/Data_Skeletons/DETECTED_SKELETONS_FOLDER/",
+        "IMAGES_WITH_DETECTED_SKELETONS": "data_proc/Data_Images/",
+        "IMAGES_INFORMATIONS_FILE": "data_proc/Data_Images/images_info.txt"
+      }
+    }
 
 
  

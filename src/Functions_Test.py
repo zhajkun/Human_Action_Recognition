@@ -183,6 +183,71 @@ def Test_Velocity():
     s2 = uti_commons.readlists_nosimp('/home/zhaj/tf_test/Human_Action_Recognition/Data_Skeletons/Test_Skeleton_X_DIR/00001.txt')
     #res = uti_skeletons_io.Cauculate_Skeleton_Velocity(s1,s2)
     print(type(s1))
+
+
+def get_training_imgs_info(
+        valid_images_list,
+        image_filename_format="{:05d}.jpg"):
+    '''
+    Arguments:
+        valid_images_list {str}: path of the txt file that 
+            stores the indices and labels of training images.
+    Return:
+        images_info {list of list}: shape=PxN, where:
+            P: number of training images
+            N=5: number of tags of that image, including: 
+                [cnt_action, cnt_clip, cnt_image, action_label, filepath]
+                An example: [8, 49, 2687, 'wave', 'wave_03-02-12-35-10-194/00439.jpg']                
+    '''
+    images_info = list()
+
+    with open(valid_images_list) as f:
+
+        folder_name = None
+        action_label = None
+        cnt_action = 0
+        actions = set()
+        action_images_cnt = dict()
+        cnt_clip = 0
+        cnt_image = 0
+
+        for cnt_line, line in enumerate(f):
+
+            if line.find('_') != -1:  # A new video type
+                folder_name = line[:-1]
+                action_label = folder_name.split('_')[0]
+                if action_label not in actions:
+                    cnt_action += 1
+                    actions.add(action_label)
+                    action_images_cnt[action_label] = 0
+
+            elif len(line) > 1:  # line != "\n"
+                # print("Line {}, len ={}, {}".format(cnt_line, len(line), line))
+                indices = [int(s) for s in line.split()]
+                idx_start = indices[0]
+                idx_end = indices[1]
+                cnt_clip += 1
+                for i in range(idx_start, idx_end+1):
+                    filepath = folder_name+"/" + image_filename_format.format(i)
+                    cnt_image += 1
+                    action_images_cnt[action_label] += 1
+
+                    # Save: 5 values, which are:action class number, clips number, images number, actions and image file path
+                    image_info = [cnt_action, cnt_clip,
+                                  cnt_image, action_label, filepath]
+                    assert(len(image_info) == LEN_IMG_INFO)
+                    images_info.append(image_info)
+                    # An example: [1, 2, 2, 'STANDING', 'STANDING_01-17-16-39-13-104/00065.jpg']
+
+        print("")
+        print("Number of action classes = {}".format(len(actions)))
+        print("Number of training images = {}".format(cnt_image))
+        print("Number of training images of each action:")
+        for action in actions:
+            print("  {:>8}| {:>4}|".format(
+                action, action_images_cnt[action]))
+
+    return images_info
 # -- Main
 
 if __name__ == "__main__":
@@ -195,19 +260,6 @@ if __name__ == "__main__":
     #     print(CLASSES)
     #     print(SKELETON_FILE_NAME_FORMAT)
 
-    cap = cv2.VideoCapture(0)
-
-    while(cap.isOpened()):
-        ret, frame = cap.read()
-
-        
-
-        cv2.imshow('frame',frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
 
 
 
@@ -236,3 +288,61 @@ if __name__ == "__main__":
     # cap.release()
     # out.release()
     # cv2.destroyAllWindows()
+    # image_filename_format = "{:05d}.jpg"
+    # LEN_IMG_INFO = 5
+    # images_info = list()
+    # images_list = "/home/zhaj/tf_test/Human_Action_Recognition/data/Data_Images/valid_images.txt"
+    # with open(images_list) as f:
+    #     print('ok)')
+
+    #     folder_name = None
+    #     action_label = None
+    #     cnt_action = 0
+    #     actions = set()
+    #     action_images_cnt = dict()
+    #     cnt_clip = 0
+    #     cnt_image = 0
+
+    #     for cnt_line, line in enumerate(f):
+
+    #         if line.find('_') != -1:  # A new video type
+    #             folder_name = line[:-1]
+    #             # print(folder_name)
+                
+    #             action_label = folder_name.split('_')[0]
+    #             # print(action_label)
+    #             if action_label not in actions:
+    #                 cnt_action += 1
+    #                 actions.add(action_label)
+    #                 action_images_cnt[action_label] = 0
+
+    #         elif len(line) > 1:  # line != "\n"
+    #             # print("Line {}, len ={}, {}".format(cnt_line, len(line), line))
+    #             indices = [int(s) for s in line.split()]
+    #             idx_start = indices[0]
+    #             idx_end = indices[1]
+    #             cnt_clip += 1
+    #             for i in range(idx_start, idx_end+1):
+    #                 filepath = folder_name+"/" + image_filename_format.format(i)
+    #                 cnt_image += 1
+    #                 action_images_cnt[action_label] += 1
+
+    #                 # Save: 5 values, which are:action class number, clips number, images number, actions and image file path
+    #                 image_info = [cnt_action, cnt_clip,
+    #                               cnt_image, action_label, filepath]
+    #                 assert(len(image_info) == LEN_IMG_INFO)
+    #                 images_info.append(image_info)
+    #                 # An example: [1, 2, 2, 'STANDING', 'STANDING_01-17-16-39-13-104/00065.jpg']
+
+    #     print("")
+    #     print("Number of action classes = {}".format(len(actions)))
+    #     print("Number of training images = {}".format(cnt_image))
+    #     print("Number of training images of each action:")
+    #     for action in actions:
+    #         print("  {:>8}| {:>4}|".format(
+    #             action, action_images_cnt[action]))
+
+    image_h = 320
+    image_w = 240
+    scale_h = 1.0 * image_h / image_w
+    print(scale_h)

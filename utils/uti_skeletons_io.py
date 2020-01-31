@@ -6,14 +6,9 @@
 {
     This module defines the functions for reading/saving, rebuild and label the skeletons data:
 
-    Main functions and classes:
-
-    function Rebuild_Skeletons
-
-
-
-
-
+    Functions:
+        rebuild_skeletons(skeletons_src)
+        cauculate_skeleton_velocity(skeletons_t1, skeletons_t2)
 }
 {License_info}
 """
@@ -52,16 +47,16 @@ NaN = 0  # `Not A Number`, which is the value for invalid data.
 
 # -- Functions
 
-def Rebuild_Skeletons(skeletons_src):
+def rebuild_skeletons(skeletons_src):
     ''' Rebuild the input skeleton data, change the chain of orders, some joints will appear
-    multiple times.
+    multiple times.More informations please check the document.
     Arguments:
-        skeletons_src {list}: contains the joint position of one axis, returned from utils/uti.openpose.humans_to_skels_list
+        skeletons_src {list}: contains the joint position of one axis, returned from utils/uti.openpose.humans_to_skels_list()
     Returns:
-        skeletons_dir {list}: rebuilded skeletons data.s
+        skeletons_dir {list}: the skeleton after rebuilded 
     '''
 
-    skeletons_dir = [0]*35
+    skeletons_dir = [0]*35  # total numer of joints after rebuild (36 joints)
     skeletons_dirs = []
     skeletons_dir[0] = skeletons_src[0][1]
     skeletons_dir[1] = skeletons_src[0][0]
@@ -101,7 +96,7 @@ def Rebuild_Skeletons(skeletons_src):
     skeletons_dirs.append(skeletons_dir)
     return skeletons_dirs
 
-def Cauculate_Skeleton_Velocity(Skeletons_t1, Skeletons_t2):
+def cauculate_skeleton_velocity(skeletons_t1, skeletons_t2):
     '''Using two skeletons from two continous frames to cauculate the displacements between the them.
     
     Arguments:
@@ -111,9 +106,9 @@ def Cauculate_Skeleton_Velocity(Skeletons_t1, Skeletons_t2):
     Returns:    
         Velocity {list}: The displacemtns between the two inputs.
     '''
-    Velocity = list(map(sub, Skeletons_t2[0], Skeletons_t1[0])) #t2 - t1
+    velocity = list(map(sub, skeletons_t2[0], skeletons_t1[0])) #t2 - t1
     
-    return Velocity
+    return velocity
 
 if __name__ == "__main__":
     s1 = uti_commons.read_listlist('/home/zhaj/tf_test/Human_Action_Recognition/Data_Skeletons/Test_Skeleton_X_DIR/00001.txt')
@@ -123,5 +118,5 @@ if __name__ == "__main__":
     print(s2)
 
     
-    res_list = Cauculate_Skeleton_Velocity(s2, s1) 
+    res_list = cauculate_skeleton_velocity(s2, s1) 
     print(res_list)

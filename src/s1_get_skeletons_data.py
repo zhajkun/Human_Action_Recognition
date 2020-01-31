@@ -25,6 +25,8 @@
 import os
 import sys
 import json
+import numpy as np
+import cv2
 # […]
 
 # Libs
@@ -41,66 +43,91 @@ if True:  # Include project path
     import utils.uti_commons as uti_commons
 # […]
 
-'''TODO: Using yaml config file to define the input and output folder path!''' 
-if True:
-    # Temporal path and format, use config.yaml file to define it later.
-    # SKELETON_X_FOLDER = ('/home/zhaj/tf_test/Human_Action_Recognition/Data_Skeletons/Test_Skeleton_X/')  # Original skeletons data from tf-openpose, no need to save
-    # SKELETON_Y_FOLDER = ('/home/zhaj/tf_test/Human_Action_Recognition/Data_Skeletons/Test_Skeleton_Y/')
-    ''' The rubuilded skeletons data in x- and y- axis, which contains 35 joints, the new order of joints check descriptions file'''
+def par(path):  # Pre-Append ROOT to the path if it's not absolute
+    return ROOT + path if (path and path[0] != "/") else path
+
+
+# [Settings] Import the settings from config/config-jso file
+
+with open(ROOT + 'config/config.json') as json_config_file:
+    config_all = json.load(json_config_file)
+    config = config_all["s1_get_skeletons_data.py"]
+
+    # common settings
+
+    CLASSES = np.array(config_all["classes"])
+    IMAGE_FILE_NAME_FORMAT = config_all["IMAGE_FILE_NAME_FORMAT"]
+    SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
+
+    # openpose
+
+    OPENPOSE_MODEL = config["openpose"]["MODEL"]
+    OPENPOSE_IMAGE_SIZE = config["openpose"]["IMAGE_SIZE"]
+
+    # input
+
+    SRC_IMAGES_DESCRIPTION_TXT = par(config["input"]["IMAGES_LIST"])
+    SRC_IMAGES_FOLDER = par(config["input"]["TRAINING_IMAGES_FOLDER"])
+
+    # output
     
-    SKELETON_X_FOLDER_DIR = ('/home/zhaj/tf_test/Human_Action_Recognition/Data_Skeletons/Test_Skeleton_X_DIR/')
-    SKELETON_Y_FOLDER_DIR = ('/home/zhaj/tf_test/Human_Action_Recognition/Data_Skeletons/Test_Skeleton_Y_DIR/')
-    
-    ''' The rubuilded skeletons displacements in x- and y- axis, which contains 35 joints, the new order of joints check descriptions file'''
-    
-    SKELETON_X_FOLDER_VEL = ('/home/zhaj/tf_test/Human_Action_Recognition/Data_Skeletons/Test_Skeleton_X_VEL/')
-    SKELETON_Y_FOLDER_VEL = ('/home/zhaj/tf_test/Human_Action_Recognition/Data_Skeletons/Test_Skeleton_Y_VEL/')
-    
-    ''' Save the images coresponding to the skeletons for debug or visualization'''
-    
-    DST_VIZ_IMGS_FOLDER = ('/home/zhaj/tf_test/Human_Action_Recognition/Data_Images/Test_Images/')
-
-    '''Define the saved files name format, start with 00000, have 5 digitals'''
-
-    SKELETON_FILENAME_FORMAT = ('{:05d}.txt')
-    IMAGE_FILENAME_FORMAT = ('{:05d}.jpg')
-def Read_Skeletons_From_Web_Camera():
-    '''Read and diaplay the images from web camera, save the skeletons '''
-    import itertools
-    for i in itertools.count():
-        img = Data_Source.Read_Image()
-        if img is None:
-            break
-        print(f"Read {i}th Frame from Web Camera...")
-
-        Detected_Human = Skeleton_Detector.detect(img)
-        Image_Output = img.copy()
-        Skeleton_Detector.draw(Image_Output, Detected_Human)
-        Image_Window.display(Image_Output)
-        Skeleton_X, Skeleton_Y, Scale_h = Skeleton_Detector.humans_to_skels_list(Detected_Human)
-
-        if Skeleton_X and Skeleton_Y: #only save non-empty lists 
-            txt_filename = SKELETON_FILENAME_FORMAT.format(i)
-            uti_commons.save_listlist(SKELETON_X_FOLDER + txt_filename, Skeleton_X)
-            uti_commons.save_listlist(SKELETON_Y_FOLDER + txt_filename, Skeleton_Y)
-            Skeleton_X_DIR = uti_skeletons_io.Rebuild_Skeletons(Skeleton_X)
-            Skeleton_Y_DIR = uti_skeletons_io.Rebuild_Skeletons(Skeleton_Y)
-            uti_commons.save_listlist(SKELETON_X_FOLDER_DIR + txt_filename, Skeleton_X_DIR)
-            uti_commons.save_listlist(SKELETON_Y_FOLDER_DIR + txt_filename, Skeleton_Y_DIR)
-
-            print(f"Saved {i}th Skeleton Data from Webcam...")
-            jpg_filename = IMG_FILENAME_FORMAT.format(i)
-            cv2.imwrite(DST_IMGS_FOLDER + jpg_filename, img)
-            cv2.imwrite(DST_VIZ_IMGS_FOLDER + jpg_filename, Image_Output)
-            print(f"Saved {i}th Image with Skeleton Data from Webcam...")
-
-
-    print("Program ends")
-
+    DST_DETECTED_SKELETONS_FOLDER = par(config["output"]["DETECTED_SKELETONS_FOLDER"])
+    DST_IMAGES_WITH_DETECTED_SKELETONS = par(config["output"]["IMAGES_WITH_DETECTED_SKELETONS"])
 
 # Main function, defaul to read images from web camera
 if __name__ == "__main__":
+
+    # set the skeleton detector. The two inputs are: operation model and image size
+    Sekeleton_Detector = uti_openpose.Skeleton_Detector(OPENPOSE_MODEL, OPENPOSE_IMAGE_SIZE)
     
+    Images_Loader = uti_commons.Read_Valid_Images_And_Action_Class(
+        img_folder = SRC_IMAGES_FOLDER,
+        valid_imgs_txt = SRC_IMAGES_DESCRIPTION_TXT,
+        image_filename_format = IMAGE_FILE_NAME_FORMAT)
+
+    # Set the images displayer
+    Images_Displayer = uti_images_io.Image_Displayer()   
+
+    # Create the folder for output, if the have not been created
+    os.makedirs(DST_DETECTED_SKELETONS_FOLDER, exist_ok= True)
+    os.makedirs(DST_IMAGES_WITH_DETECTED_SKELETONS, exist_ok= True)
+
+    iTotal_Number_of_Images = Images_Loader.num_images
+    for iImages_Counter in range(iTotal_Number_of_Images):
+        # Load training images
+        Image, sAction_Class, sImage_Info = Images_Loader.read_image()
+        # detect humans
+        Humans = Sekeleton_Detector.detect(Image)
+
+        # display detected skeletons on images
+        Image_DST = Image.copy()
+        Sekeleton_Detector.draw(Image_DST, Humans)
+        Images_Displayer.display(Image_DST, 1)
+
+        # save skeletons coordinates to txt files and the sImage_Info with it at the begining
+        SKELETONS, SCALE_H = Sekeleton_Detector.humans_to_skeletons_list(Humans)
+
+        SKELETONS.insert(0,sImage_Info)
+
+        sFile_Name = SKELETON_FILE_NAME_FORMAT.format(iImages_Counter)
+        uti_commons.save_listlist(
+            DST_DETECTED_SKELETONS_FOLDER + sFile_Name, SKELETONS)
+
+        sImage_Name = IMAGE_FILE_NAME_FORMAT.format(iImages_Counter)
+        cv2.imwrite(DST_IMAGES_WITH_DETECTED_SKELETONS + sImage_Name, Image_DST)
+
+    print("Programm End")
+
+
+
+
+
+
+
+
+
+
+
 
 __author__ = '{author}'
 __copyright__ = 'Copyright {year}, {project_name}'

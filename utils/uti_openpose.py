@@ -28,15 +28,20 @@ import sys
 import time
 import argparse
 import logging
+import json
 # […]
 
 # Libs
 import cv2
+
 # Add tf-pose-estimation project
 ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
 CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
-sys.path.append(ROOT)
-sys.path.append(ROOT + "/home/zhaj/tf-pose-estimation")
+with open(ROOT + 'config/config.json') as json_config_file:
+    config_all = json.load(json_config_file)
+    LOCAL_OPENPOSE = config_all["TF_OPENPOSE_LOCATION"]
+    sys.path.append(ROOT)
+    sys.path.append(ROOT + LOCAL_OPENPOSE)
 # openpose packages
 
 from tf_pose.networks import get_graph_path, model_wh
@@ -45,7 +50,7 @@ from tf_pose import common
 # Own modules
 
 # -- Settings
-MAX_FRACTION_OF_GPU_TO_USE = 0.4
+MAX_FRACTION_OF_GPU_TO_USE = 0.9
 IS_DRAW_FPS = True
 
 # -- Helper functions
@@ -122,8 +127,8 @@ class Skeleton_Detector(object):
                 `TfPoseEstimator.inference` which is defined in
                 `/home/zhaj/tf-pose-estimation/tf_pose/estimator.py`.
 
-                I've written a function `self.humans_to_skels_list` to 
-                extract the skeleton from this `class Human` and save the coordinate of x- and y- axis sepratly. 
+                I've written a function `self.humans_to_skeletons_list` to 
+                extract the skeleton from this `class Human` and save the coordinate of x- and y- axis in one list. 
         '''
 
         self._iImage_Counter += 1
@@ -158,7 +163,7 @@ class Skeleton_Detector(object):
                         (0, 0, 255), 2)
         self._prev_t = time.time()
 
-    def humans_to_skels_list(self, humans, scale_h = None): 
+    def humans_to_skeletons_list(self, humans, scale_h = None): 
         ''' Get skeleton data of (x, y * scale_h) from humans.
         Arguments:
             humans {a class returned by self.detect}
@@ -173,34 +178,38 @@ class Skeleton_Detector(object):
             Changes:
             skeletons_x {list of lists}: a list of skeletons of x- axis.
             skeletons_y {list of lists}: a list of skeletons of y- axis.
+            Rechanges:
+            It seems better to get the raw skeltons first, then seperate then x- and y- axis later
+
         '''
-        # if scale_h is None:
-        #     scale_h = self._scale_h
-        # skeletons = []
-        # NaN = 0
-        # for human in humans:
-        #     skeleton = [NaN]*(18*2)
-        #     for i, body_part in human.body_parts.items(): # iterate dict
-        #         idx = body_part.part_idx
-        #         skeleton[2*idx]=body_part.x
-        #         skeleton[2*idx+1]=body_part.y * scale_h
-        #     skeletons.append(skeleton)
-        # return skeletons, scale_h
         if scale_h is None:
             scale_h = self._scale_h
-        skeletons_x = []
-        skeletons_y = []
+        skeletons = []
         NaN = 0
         for human in humans:
-            skeleton_x = [NaN]*(18*1)
-            skeleton_y = [NaN]*(18*1)
+            skeleton = [NaN]*(18*2) # for 18 joints in x- and y- axis
             for i, body_part in human.body_parts.items(): # iterate dict
                 idx = body_part.part_idx
-                skeleton_x[idx]=body_part.x
-                skeleton_y[idx]=body_part.y * scale_h
-            skeletons_x.append(skeleton_x)
-            skeletons_y.append(skeleton_y)
-        return skeletons_x, skeletons_y, scale_h
+                skeleton[2*idx]=body_part.x
+                skeleton[2*idx+1]=body_part.y * scale_h
+            skeletons.append(skeleton)
+        return skeletons, scale_h
+
+        # if scale_h is None:
+        #     scale_h = self._scale_h
+        # skeletons_x = []
+        # skeletons_y = []
+        # NaN = 0
+        # for human in humans:
+        #     skeleton_x = [NaN]*(18*1)
+        #     skeleton_y = [NaN]*(18*1)
+        #     for i, body_part in human.body_parts.items(): # iterate dict
+        #         idx = body_part.part_idx
+        #         skeleton_x[idx]=body_part.x
+        #         skeleton_y[idx]=body_part.y * scale_h
+        #     skeletons_x.append(skeleton_x)
+        #     skeletons_y.append(skeleton_y)
+        # return skeletons_x, skeletons_y, scale_h
 
      
 def test_openpose_on_webcamera():
@@ -219,7 +228,7 @@ def test_openpose_on_webcamera():
         img = Webcam_Reader.Read_Image()
         if img is None:
             break
-        print(f"Read {i}th image...")
+        print(f"Read {i}th image from Webcam...")
 
         # Detect
         humans = skeleton_detector.detect(img)
@@ -228,8 +237,8 @@ def test_openpose_on_webcamera():
         img_disp = img.copy()
         skeleton_detector.draw(img_disp, humans)
         img_displayer.display(img_disp)
-        lists = skeleton_detector.humans_to_skels_list(humans)
-        print(lists)
+        lists = skeleton_detector.humans_to_skeletons_list(humans)
+        # print(lists)
     print("Program ends")
 
 if __name__ == "__main__":
