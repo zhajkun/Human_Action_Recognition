@@ -64,6 +64,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
     CLASSES = np.array(config_all["classes"])
     IMAGE_FILE_NAME_FORMAT = config_all["IMAGE_FILE_NAME_FORMAT"]
     SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
+    IMAGES_INFO_INDEX = config_all["IMAGES_INFO_INDEX"]
 
     # openpose
 
@@ -121,7 +122,7 @@ def main_function():
 
         SKELETONS_DIR = uti_filter.delete_invalid_skeletons_from_dict(SKELETONS)
         # add the label infos to this skeleton
-        SKELETONS_DIR.insert(0,sImage_Info)
+        SKELETONS_DIR.insert(IMAGES_INFO_INDEX, sImage_Info)
 
         sFile_Name = SKELETON_FILE_NAME_FORMAT.format(iImages_Counter)
         uti_commons.save_listlist(

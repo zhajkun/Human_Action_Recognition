@@ -60,7 +60,9 @@ with open(ROOT + 'config/config.json') as json_config_file:
     CLASSES = np.array(config_all["classes"])
     IMAGE_FILE_NAME_FORMAT = config_all["IMAGE_FILE_NAME_FORMAT"]
     SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
-
+    CLIP_NUM_INDEX = config_all["CLIP_NUM_INDEX"]
+    ACTION_CLASS_INEDX = config_all["ACTION_CLASS_INEDX"]
+    IMAGES_INFO_INDEX = config_all["IMAGES_INFO_INDEX"]
     # input
 
     DETECTED_SKELETONS_FOLDER = par(config["input"]["DETECTED_SKELETONS_FOLDER"])
@@ -113,8 +115,8 @@ def read_labels_in_single_text(iFile_Number):
     sFile_Names = DETECTED_SKELETONS_FOLDER + \
         SKELETON_FILE_NAME_FORMAT.format(iFile_Number)
     labels_dir = uti_commons.read_listlist(sFile_Names)
-    labels_dir = labels_dir[0]
-    labels_dir = labels_dir[3] # name of action class is in[3]
+    labels_dir = labels_dir[IMAGES_INFO_INDEX]
+    # labels_dir = labels_dir[3] # name of action class is in[3]
     return labels_dir
 
 def main_function():
@@ -136,13 +138,14 @@ def main_function():
         all_skeletons.append(skeletons)
         # get action classes
         labels = read_labels_in_single_text(i)
-        if labels not in CLASSES:
+        action_class = labels[ACTION_CLASS_INEDX]
+        if action_class not in CLASSES:
             continue
         all_labels.append(labels)
-        Action_Labels[labels] += 1
+        Action_Labels[action_class] += 1
         print("{}/{}".format(i, iNumber_of_Files))
         # -- Save to npz file
-    np.savez(ALL_DETECTED_SKELETONS, all_skeletons,all_labels)
+    np.savez(ALL_DETECTED_SKELETONS, all_skeletons, all_labels)
     # np.savez(ALL_TRAINING_LABELS, all_labels)
     # print summary of training images
     images_infos = open(IMAGES_INFO_SUMMARY, 'w')

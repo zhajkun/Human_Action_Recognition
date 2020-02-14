@@ -53,6 +53,8 @@ with open(ROOT + 'config/config.json') as json_config_file:
     CLASSES = np.array(config_all["classes"])
     IMAGE_FILE_NAME_FORMAT = config_all["IMAGE_FILE_NAME_FORMAT"]
     SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
+    CLIP_NUM_INDEX = config_all["CLIP_NUM_INDEX"]
+    ACTION_CLASS_INEDX = config_all["ACTION_CLASS_INEDX"]
 
     # input
 
@@ -70,7 +72,16 @@ with open(ROOT + 'config/config.json') as json_config_file:
 
 
 # -- Functions
-
+def load_numpy_array(ALL_DETECTED_SKELETONS):
+    numpy_array = np.load(ALL_DETECTED_SKELETONS)
+    skeletons = numpy_array["arr_0"]
+    labels = numpy_array["arr_1"]
+    action_class = []
+    video_clips = []
+    for i in range(len(labels)):
+        action_class.append(labels[i][ACTION_CLASS_INEDX])
+        video_clips.append(labels[i][CLIP_NUM_INDEX])
+    return skeletons, action_class, video_clips
 
 def process_features(X0, Y0, video_indices, classes):
     ''' Process features '''
@@ -105,17 +116,11 @@ def main():
     '''
 
     # Load data
-    input = np.load(ALL_DETECTED_SKELETONS)
-    skeletons = input["arr_0"]
-    labels = input["arr_1"]
-    print(f"Skeletons number:{len(skeletons)}")
-    print(f"Labels number:{len(labels)}")
-    print("end")
-
-
+    skeletons, action_class, clip_number = load_numpy_array(ALL_DETECTED_SKELETONS )
+    print(clip_number)
 if __name__ == "__main__":
-    main()
-    sys.exit()
+    skletons, action_class, video_clips = load_numpy_array(ALL_DETECTED_SKELETONS)
+    print(video_clips)
 __author__ = '{author}'
 __copyright__ = 'Copyright {year}, {project_name}'
 __credits__ = ['{credit_list}']
