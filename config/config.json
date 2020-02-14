@@ -2,10 +2,10 @@
     "classes":
     [
       "STANDING",
-      "WALK_TO_ME",
+      "WALKTOME",
       "WALKING",
       "WAVING",
-      "PUT_IN_BASKET",
+      "PUTINBASKET",
       "UNDEFINED",
       "RESERVED"
     ],
@@ -45,10 +45,33 @@
       {
         "DETECTED_SKELETONS_FOLDER": "data_proc/Data_Skeletons/DETECTED_SKELETONS_FOLDER/",
         "IMAGES_WITH_DETECTED_SKELETONS": "data_proc/Data_Images/",
-        "IMAGES_INFORMATIONS_FILE": "data_proc/Data_Images/images_info.txt"
+        "INVALID_IMAGES_FILE": "data_proc/invalid_images.txt"
+      }
+    },
+
+    "s2_pack_all_text_files.py":
+    {
+      "input": 
+      {
+        "DETECTED_SKELETONS_FOLDER": "data_proc/Data_Skeletons/DETECTED_SKELETONS_FOLDER/"
+      },
+      "output": 
+      {
+        "ALL_DETECTED_SKELETONS": "data_proc/Data_Skeletons/all_detected_skeletons.npz",
+        "IMAGES_INFO_SUMMARY": "data_proc/images_info.txt"
+      }
+    },
+    
+    "s3_pre_processing.py":
+    {
+      "input":
+      {
+        "ALL_DETECTED_SKELETONS": "data_proc/Data_Skeletons/all_detected_skeletons.npz"
+      },
+      "output":
+      {
+        "FEATURES": "data_proc/Data_Features/features.npz"        
       }
     }
 
-
- 
-  }
+}

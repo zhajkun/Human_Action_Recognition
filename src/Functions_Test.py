@@ -5,11 +5,18 @@
 """
 {
     This module is used to test the funtions, classes from every implemented files.
+    COCO Output Format
+    Nose – 0, Neck – 1, Right Shoulder – 2, Right Elbow – 3, Right Wrist – 4,
+    Left Shoulder – 5, Left Elbow – 6, Left Wrist – 7, Right Hip – 8,
+    Right Knee – 9, Right Ankle – 10, Left Hip – 11, Left Knee – 12,
+    LAnkle – 13, Right Eye – 14, Left Eye – 15, Right Ear – 16,
+    Left Ear – 17, Background – 18
 }
 {License_info}
 """
 
 # Futures
+
 
 # […]
 
@@ -23,6 +30,10 @@ import numpy as np
 import cv2
 import simplejson
 import json
+import timeit
+import math
+import functools
+import tensorflow as tf
 # […]
 
 # Own modules
@@ -248,6 +259,12 @@ def get_training_imgs_info(
                 action, action_images_cnt[action]))
 
     return images_info
+
+def cmp(a,b):
+    str1 = str(a)+str(b)
+    str2 = str(b)+str(a)
+    return (str1 > str2) - (str1 < str2)
+
 # -- Main
 
 if __name__ == "__main__":
@@ -307,9 +324,8 @@ if __name__ == "__main__":
 
     #         if line.find('_') != -1:  # A new video type
     #             folder_name = line[:-1]
-    #             # print(folder_name)
-                
-    #             action_label = folder_name.split('_')[0]
+    #             # print(foldedef cmp(a,b):
+
     #             # print(action_label)
     #             if action_label not in actions:
     #                 cnt_action += 1
@@ -334,7 +350,7 @@ if __name__ == "__main__":
     #                 images_info.append(image_info)
     #                 # An example: [1, 2, 2, 'STANDING', 'STANDING_01-17-16-39-13-104/00065.jpg']
 
-    #     print("")
+    #     print("") 
     #     print("Number of action classes = {}".format(len(actions)))
     #     print("Number of training images = {}".format(cnt_image))
     #     print("Number of training images of each action:")
@@ -342,7 +358,40 @@ if __name__ == "__main__":
     #         print("  {:>8}| {:>4}|".format(
     #             action, action_images_cnt[action]))
 
-    image_h = 320
-    image_w = 240
-    scale_h = 1.0 * image_h / image_w
-    print(scale_h)
+
+
+
+#     mnist = tf.keras.datasets.mnist
+
+#     (x_train, y_train), (x_test, y_test) = mnist.load_data()
+#     x_train, x_test = x_train / 255.0, x_test / 255.0
+#     model = tf.keras.models.Sequential([
+#   tf.keras.layers.Flatten(input_shape=(28, 28)),
+#   tf.keras.layers.Dense(128, activation='relu'),
+#   tf.keras.layers.Dropout(0.2),
+#   tf.keras.layers.Dense(10, activation='softmax')])
+
+#     model.compile(optimizer='adam',
+#               loss='sparse_categorical_crossentropy',
+#               metrics=['accuracy'])
+#     model = tf.keras.models.Sequential([
+#   tf.keras.layers.Flatten(input_shape=(28, 28)),
+#   tf.keras.layers.Dense(128, activation='relu'),
+#   tf.keras.layers.Dropout(0.2),
+#   tf.keras.layers.Dense(10, activation='softmax')
+# ])
+
+# model.compile(optimizer='adam',
+#               loss='sparse_categorical_crossentropy',
+#               metrics=['accuracy'])
+# model.fit(x_train, y_train, epochs=5)
+
+# model.evaluate(x_test,  y_test, verbose=2)
+
+
+    sss = [0.29878048780487804, 0.3546195652173913, 0.29878048780487804, 0.37907608695652173, 0.2896341463414634, 0.375, 0, 0, 0, 0, 0.31097560975609756, 0.37907608695652173, 0.31097560975609756, 0.4157608695652174, 0.3048780487804878, 0.4279891304347826, 0.28353658536585363, 0.4483695652173913, 0.3231707317073171, 0.46467391304347827, 0.29878048780487804, 0.5380434782608695, 0.29878048780487804, 0.4483695652173913, 0.32926829268292684, 0.46467391304347827, 0.3231707317073171, 0.5339673913043479, 0.29878048780487804, 0.35054347826086957, 0.3018292682926829, 0.35054347826086957, 0, 0, 0.3079268292682927, 0.3546195652173913]
+
+    xxx = sss[::2]
+    yyy = sss[1::2]
+    print(max(yyy))
+    print(min(yyy))

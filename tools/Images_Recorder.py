@@ -84,7 +84,6 @@ if __name__=="__main__":
 
     Data_Source = uti_images_io.Read_Images_From_Webcam(FRAME_RATE, WEBCAM_INDEX)
 
-    
     while Data_Source.Image_Captured():
         
         image = Data_Source.Read_Image()

@@ -88,7 +88,7 @@ def get_training_images_info(
         valid_images_list,
         image_filename_format="{:05d}.jpg"):
     '''
-    Read the descripution file from 
+    Read the descripution file from data/Data_Images/valid_images.txt
     Arguments:
         valid_images_list {str}: path of the txt file that 
             stores the indices and labels of training images.
@@ -148,6 +148,8 @@ def get_training_images_info(
                 action, iAction_Images_Counter[action]))
 
     return images_info
+
+
 ##############################################################################################################################
 # 
 #
@@ -172,12 +174,12 @@ class Keyboard_Processor_For_Images_Recorder(object):
     def check_key_and_save_image(self, q, image):
         
         if q>=0 and chr(q)=='s' and self.is_recording == False:
-            sleep(1)
+      
             self.is_recording = True
             self.cnt_video += 1
             self.iImages_Counter = 0
             self.folder = self.sub_folder_name + "_"  + get_time()
-            sleep(2)
+       
             if not os.path.exists(self.path + self.folder):
                 os.makedirs(self.path + self.folder)
 
@@ -282,10 +284,11 @@ class Read_Valid_Images_And_Action_Class(object):
 
     def get_image_info(self, index):
         # Something like [1, 7, 54, "jump", "jump_03-02-12-34-01-795/00240.jpg"]
+        
         return self.images_info[index-1]
 ''' Test the functions in this module '''
 if __name__ == "__main__":
     file = "data/Data_Images/valid_images.txt"
-    s = get_training_imgs_info(file , image_filename_format="{:05d}.jpg")
+    s = get_training_images_info(file , image_filename_format="{:05d}.jpg")
     print(s)
 
