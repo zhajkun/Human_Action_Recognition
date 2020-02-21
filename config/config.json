@@ -14,6 +14,7 @@
     "SKELETON_FILE_NAME_FORMAT": "{:05d}.txt",
     "VIDEO_FILE_NAME_FORMAT": "{:05d}.avi",
     "TF_OPENPOSE_LOCATION": "/home/zhaj/tf-pose-estimation",
+    "FEATURE_WINDOW_SIZE": 10,
     "IMAGES_INFO_INDEX": 0,
     "CLIP_NUM_INDEX": 1,
     "ACTION_CLASS_INEDX": 3,

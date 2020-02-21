@@ -32,6 +32,7 @@ import sys
 # Libs
 import numpy as np
 import json
+from collections import deque
 # openpose packages
 
 from tf_pose.networks import get_graph_path, model_wh
@@ -205,7 +206,36 @@ def rebuild_skeleton_joint_order(skeletons_src):
     # End of rebuild
     return skeletons_dir
 
-# def extract_features():
+def extract_features(
+            X, video_indices, window_size):
+    ''' From image index and raw skeleton positions,
+        Extract features of body velocity, joint velocity, and normalized joint positions.
+    '''
+    X_new = []
+    Xs_new = []
+    N = len(video_indices)
+
+    # Loop through all data
+    for i, _ in enumerate(video_indices):
+
+        # If a new video clip starts, reset the feature generator
+        if i == 0 or video_indices[i] != video_indices[i-1]:
+            fg = Features_Generator(window_size)
+        
+        # Get features
+        success, features_x, features_y = fg.add_cur_skeleton(X[i, :])
+        if success:  # True if (data length > 5) and (skeleton has enough joints)
+            X_new.append(features_x)
+            Xs_new.append(features_y)
+
+
+        # Print
+        print(f"{i}/{N}", end=", ")
+            
+    X_new = np.array(X_new)
+    Xs_new = np.array(Xs_new)
+
+    return X_new, Xs_new
 
 ##############################################################################################################
 
@@ -223,76 +253,60 @@ class Features_Generator(object):
         self._skeletons_deque = deque()
         self._skeletons_prev = None
 
-    def add_cur_skeleton(self, skeleton):
+    def add_cur_skeleton(self, skeleton_src):
         ''' Input a new skeleton, return the extracted feature.
+        Arguments:
+            skeletons_src {list}: The input new skeleton
         Returns:
-            is_success {bool}: Return the feature only when
+            bSuccess {bool}: Return the feature only when
                 the historical input skeletons are more than self._window_size.
             features {np.array} 
         '''
 
-        x = retrain_only_body_joints(skeleton)
-#######################################################################################################################
-    #    if not ProcFtr.has_neck_and_thigh(x):
+        skeleton = rebuild_skeleton_joint_order(skeleton_src)
+
+    # Add the filter here if need, already branched to filter_v1
+    #    if not ProcFtr.has_neck_and_thigh(skeleton):
     #        self.reset()
     #        return False, None
 
     #    else:
-#######################################################################################################################
-            # -- Preprocess x
-            # Fill zeros, compute angles/lens
-            x = self._fill_invalid_data(x)
-            if self._is_adding_noise:
-                # Add noise druing training stage to augment data
-                x = self._add_noises(x, self._noise_intensity)
-            x = np.array(x)
-            # angles, lens = ProcFtr.joint_pos_2_angle_and_length(x) # deprecate
 
-            # Push to deque
-            self._skeletons_deque.append(x)
-            # self._angles_deque.append(angles) # deprecate
-            # self._lens_deque.append(lens) # deprecate
+        # -- Preprocess skeleton
 
-            self._maintain_deque_size()
-            self._skeletons_prev = x.copy()
+        skeleton = np.array(skeleton)
+        # Push to deque
+        self._skeletons_deque.append(skeleton)
 
-            # -- Extract features
-            if len(self._skeletons_deque) < self._window_size:
-                return False, None
-            else:
-                # -- Normalize all 1~t features
-                h_list = [ProcFtr.get_body_height(xi) for xi in self._skeletons_deque]
-                mean_height = np.mean(h_list)
-                xnorm_list = [ProcFtr.remove_body_offset(xi)/mean_height
-                              for xi in self._skeletons_deque]
+        self._maintain_deque_size()
+        self._skeletons_prev = skeleton.copy()
 
-                # -- Get features of pose/angles/lens
-                f_poses = self._deque_features_to_1darray(xnorm_list)
-                # f_angles = self._deque_features_to_1darray(self._angles_deque) # deprecate
-                # f_lens = self._deque_features_to_1darray(
-                #     self._lens_deque) / mean_height # deprecate
-
-                # -- Get features of motion
-
-                f_v_center = self._compute_v_center(
-                    self._skeletons_deque, step=1) / mean_height  # len = (t=4)*2 = 8
-                f_v_center = np.repeat(f_v_center, 10)  # repeat to add weight
-
-                f_v_joints = self._compute_v_all_joints(
-                    xnorm_list, step=1)  # len = (t=(5-1)/step)*12*2 = 96
-
-                # -- Output
-                features = np.concatenate((f_poses, f_v_joints, f_v_center))
-                return True, features.copy()
+        # -- Extract features
+        if len(self._skeletons_deque) < self._window_size:
+            return False, None, None
+        else:
+            # -- Get features of pose/angles/lens
+            x_list = self._skeletons_deque
+            f_poses = self._deque_features_to_1darray(x_list)
+            # f_angles = self._deque_features_to_1darray(self._angles_deque) # deprecate
+            # f_lens = self._deque_features_to_1darray(
+            #     self._lens_deque) / mean_height # deprecate
+            # -- Get features of motion
+            ##############################################################################
+            # f_v_center = self._compute_v_center(
+            #     self._skeletons_deque, step=1) / mean_height  # len = (t=4)*2 = 8
+            # f_v_center = np.repeat(f_v_center, 10)  # repeat to add weight
+            ##############################################################################
+            f_v_joints = self._compute_v_all_joints(
+                x_list, step=1)  # len = (t=(5-1)/step)*12*2 = 96
+            # -- Output
+            # features = np.concatenate((f_poses, f_v_joints))
+            return True, f_poses.copy(), f_v_joints.copy()
 
     def _maintain_deque_size(self):
         if len(self._skeletons_deque) > self._window_size:
             self._skeletons_deque.popleft()
-        if len(self._angles_deque) > self._window_size:
-            self._angles_deque.popleft()
-        if len(self._lens_deque) > self._window_size:
-            self._lens_deque.popleft()
-
+ 
     def _compute_v_center(self, x_deque, step):
         vel = []
         for i in range(0, len(x_deque) - step, step):
@@ -377,11 +391,13 @@ class Features_Generator(object):
 if __name__ == "__main__":
 
     skeletons, labels = load_numpy_array('data_proc/Data_Skeletons/all_detected_skeletons.npz')
-    test_1 = skeletons[5]
+    clips = []
+    for i in range(len(labels)):
+        clips.append(labels[i][1]) 
 
-    temp_x = rebuild_skeleton_joint_order(test_1)
+    temp_x, temp_y = extract_features(skeletons, clips, 10 )
 
-    print(temp_x)
+    print(f"X.shape = {temp_x.shape}, Xs.shape = {temp_y.shape}")
 __author__ = '{author}'
 __copyright__ = 'Copyright {year}, {project_name}'
 __credits__ = ['{credit_list}']

@@ -121,6 +121,8 @@ def main():
 if __name__ == "__main__":
     skletons, action_class, video_clips = load_numpy_array(ALL_DETECTED_SKELETONS)
     print(video_clips)
+
+    
 __author__ = '{author}'
 __copyright__ = 'Copyright {year}, {project_name}'
 __credits__ = ['{credit_list}']
