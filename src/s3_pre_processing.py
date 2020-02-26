@@ -38,6 +38,7 @@ if True:  # Include project path
     import utils.uti_skeletons_io as uti_skeletons_io
     import utils.uti_commons as uti_commons
     import utils.uti_filter as uti_filter
+    import utils.uti_pre_processing as uti_pre_processing
 
 
 def par(path):  # Pre-Append ROOT to the path if it's not absolute
@@ -55,6 +56,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
     SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
     CLIP_NUM_INDEX = config_all["CLIP_NUM_INDEX"]
     ACTION_CLASS_INEDX = config_all["ACTION_CLASS_INEDX"]
+    FEATURE_WINDOW_SIZE = config_all["FEATURE_WINDOW_SIZE"]
 
     # input
 
@@ -91,17 +93,17 @@ def process_features(X0, Y0, video_indices, classes):
     #       of multiple adjacent images, including speed, normalized pos, etc.
     ADD_NOISE = False
     if ADD_NOISE:
-        X1, Y1 = extract_multi_frame_features(
+        X1, Y1 = extract_features(
             X0, Y0, video_indices, WINDOW_SIZE, 
             is_adding_noise=True, is_print=True)
-        X2, Y2 = extract_multi_frame_features(
+        X2, Y2 = extract_features(
             X0, Y0, video_indices, WINDOW_SIZE,
             is_adding_noise=False, is_print=True)
         X = np.vstack((X1, X2))
         Y = np.concatenate((Y1, Y2))
         return X, Y
     else:
-        X, Y = extract_multi_frame_features(
+        X, Y = extract_features(
             X0, Y0, video_indices, WINDOW_SIZE, 
             is_adding_noise=False, is_print=True)
         return X, Y
@@ -109,7 +111,7 @@ def process_features(X0, Y0, video_indices, classes):
 # -- Main
 
 
-def main():
+def main_function():
     ''' 
     Load skeleton data from `skeletons_info.txt`, process data, 
     and then save features and labels to .csv file.
@@ -117,10 +119,16 @@ def main():
 
     # Load data
     skeletons, action_class, clip_number = load_numpy_array(ALL_DETECTED_SKELETONS )
-    print(clip_number)
+    temp_x, temp_y = extract_features(skeletons, action_class, FEATURE_WINDOW_SIZE )
+    clips = []
+    for i in range(len(labels)):
+        clips.append(labels[i][1]) 
+
+    temp_x, temp_y = extract_features(skeletons, action_class, FEATURE_WINDOW_SIZE )
+
 if __name__ == "__main__":
-    skletons, action_class, video_clips = load_numpy_array(ALL_DETECTED_SKELETONS)
-    print(video_clips)
+    main_function()
+    print("Programms End")
 
     
 __author__ = '{author}'

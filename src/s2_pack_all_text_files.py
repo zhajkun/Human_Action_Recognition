@@ -71,7 +71,8 @@ with open(ROOT + 'config/config.json') as json_config_file:
     
     ALL_DETECTED_SKELETONS = par(config["output"]["ALL_DETECTED_SKELETONS"])
     IMAGES_INFO_SUMMARY = par(config["output"]["IMAGES_INFO_SUMMARY"])
-    # ALL_TRAINING_LABELS = par(config["output"]["ALL_TRAINING_LABELS"])
+    ALL_SKELETONS_NPY = par(config["output"]["ALL_SKELETONS_NPY"])
+    ALL_LABELS_NPY = par(config["output"]["ALL_LABELS_NPY"])
 #############################################################################################
 def read_all_file_names(sFile_Path, bSort_Lists=True):
     ''' Get all filenames under certain path 
@@ -145,8 +146,8 @@ def main_function():
         Action_Labels[action_class] += 1
         print("{}/{}".format(i, iNumber_of_Files))
         # -- Save to npz file
-    np.savez(ALL_DETECTED_SKELETONS, all_skeletons, all_labels)
-    # np.savez(ALL_TRAINING_LABELS, all_labels)
+    np.savez(ALL_DETECTED_SKELETONS, ALL_SKELETONS_NPY = all_skeletons, ALL_LABELS_NPY = all_labels)
+
     # print summary of training images
     images_infos = open(IMAGES_INFO_SUMMARY, 'w')
     line_1 = (f"There are {len(all_skeletons)} skeleton data. \n")
@@ -165,13 +166,7 @@ def main_function():
 #############################################################################################
 # Main function, defaul to read images from web camera
 if __name__ == "__main__":
-    # fnmaes = read_all_file_names(DETECTED_SKELETONS_FOLDER)
-    # print(fnmaes)
-
-
     main_function()
-    # m = np.load(ALL_DETECTED_SKELETONS)
-    # print(m["arr_1"])
 
 
 
