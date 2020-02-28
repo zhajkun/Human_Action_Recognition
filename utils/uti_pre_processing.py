@@ -207,12 +207,13 @@ def rebuild_skeleton_joint_order(skeletons_src):
     return skeletons_dir
 
 def extract_features(
-            X, video_indices, window_size):
+            skeletons, labels, video_indices, window_size):
     ''' From image index and raw skeleton positions,
         Extract features of body velocity, joint velocity, and normalized joint positions.
     '''
-    X_new = []
-    Xs_new = []
+    skeletons_temp = []
+    velocity_temp = []
+    labels_temp = []
     N = len(video_indices)
 
     # Loop through all data
@@ -223,19 +224,20 @@ def extract_features(
             fg = Features_Generator(window_size)
         
         # Get features
-        success, features_x, features_y = fg.add_cur_skeleton(X[i, :])
+        success, features_x, features_xs = fg.add_cur_skeleton(skeletons[i, :])
         if success:  # True if (data length > 5) and (skeleton has enough joints)
-            X_new.append(features_x)
-            Xs_new.append(features_y)
+            skeletons_temp.append(features_x)
+            velocity_temp.append(features_xs)
+            labels_temp.append(labels[i])
 
 
         # Print
         print(f"{i}/{N}", end=", ")
             
-    X_new = np.array(X_new)
-    Xs_new = np.array(Xs_new)
-
-    return X_new, Xs_new
+    skeletons_temp = np.array(skeletons_temp)
+    velocity_temp = np.array(velocity_temp)
+    labels_temp = np.array(labels_temp)
+    return skeletons_temp, velocity_temp, labels_temp
 
 ##############################################################################################################
 
@@ -376,14 +378,6 @@ class Features_Generator(object):
         for i in range(len(deque_data)):
             next_feature = deque_data[i].tolist()
             features += next_feature
-        features = np.array(features)
-        return features
-
-    def _deque_features_to_2darray(self, deque_data):
-        features = []
-        for i in range(len(deque_data)):
-            next_feature = deque_data[i].tolist()
-            features.append(next_feature)
         features = np.array(features)
         return features
 

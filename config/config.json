@@ -5,9 +5,7 @@
       "WALKTOME",
       "WALKING",
       "WAVING",
-      "PUTINBASKET",
-      "UNDEFINED",
-      "RESERVED"
+      "PUTINBASKET"
     ],
 
     "IMAGE_FILE_NAME_FORMAT": "{:05d}.jpg",
@@ -74,8 +72,21 @@
       },
       "output":
       {
-        "FEATURES": "data_proc/Data_Features/features.npz"        
+        "FEATURES": "data_proc/Data_Features/features.npz"     
       }
+    },
+
+    "train.py":
+    {
+      "input":
+      {
+
+      },
+      "output":
+      {
+        "MODEL_PATH": "model/model.pickle"
+      }
+
     }
 
 }

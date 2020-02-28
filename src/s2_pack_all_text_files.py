@@ -71,8 +71,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
     
     ALL_DETECTED_SKELETONS = par(config["output"]["ALL_DETECTED_SKELETONS"])
     IMAGES_INFO_SUMMARY = par(config["output"]["IMAGES_INFO_SUMMARY"])
-    ALL_SKELETONS_NPY = par(config["output"]["ALL_SKELETONS_NPY"])
-    ALL_LABELS_NPY = par(config["output"]["ALL_LABELS_NPY"])
+
 #############################################################################################
 def read_all_file_names(sFile_Path, bSort_Lists=True):
     ''' Get all filenames under certain path 
@@ -146,7 +145,7 @@ def main_function():
         Action_Labels[action_class] += 1
         print("{}/{}".format(i, iNumber_of_Files))
         # -- Save to npz file
-    np.savez(ALL_DETECTED_SKELETONS, ALL_SKELETONS_NPY = all_skeletons, ALL_LABELS_NPY = all_labels)
+    np.savez(ALL_DETECTED_SKELETONS, ALL_SKELETONS = all_skeletons, ALL_LABELS = all_labels)
 
     # print summary of training images
     images_infos = open(IMAGES_INFO_SUMMARY, 'w')

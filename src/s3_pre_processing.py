@@ -51,7 +51,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
 
     # common settings
 
-    CLASSES = np.array(config_all["classes"])
+    CLASSES = config_all["classes"]
     IMAGE_FILE_NAME_FORMAT = config_all["IMAGE_FILE_NAME_FORMAT"]
     SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
     CLIP_NUM_INDEX = config_all["CLIP_NUM_INDEX"]
@@ -65,49 +65,23 @@ with open(ROOT + 'config/config.json') as json_config_file:
     # output
     
     FEATURES = par(config["output"]["FEATURES"])
-
-
-
-
-
-
-
-
 # -- Functions
 def load_numpy_array(ALL_DETECTED_SKELETONS):
     numpy_array = np.load(ALL_DETECTED_SKELETONS)
-    skeletons = numpy_array["arr_0"]
-    labels = numpy_array["arr_1"]
+    skeletons = numpy_array['ALL_SKELETONS']
+    labels = numpy_array['ALL_LABELS']
     action_class = []
     video_clips = []
     for i in range(len(labels)):
-        action_class.append(labels[i][ACTION_CLASS_INEDX])
+        action_class.append(convert_action_to_int(labels[i][ACTION_CLASS_INEDX], CLASSES))
         video_clips.append(labels[i][CLIP_NUM_INDEX])
     return skeletons, action_class, video_clips
 
-def process_features(X0, Y0, video_indices, classes):
-    ''' Process features '''
-    # Convert features
-    # From: raw feature of individual image.
-    # To:   time-serials features calculated from multiple raw features
-    #       of multiple adjacent images, including speed, normalized pos, etc.
-    ADD_NOISE = False
-    if ADD_NOISE:
-        X1, Y1 = extract_features(
-            X0, Y0, video_indices, WINDOW_SIZE, 
-            is_adding_noise=True, is_print=True)
-        X2, Y2 = extract_features(
-            X0, Y0, video_indices, WINDOW_SIZE,
-            is_adding_noise=False, is_print=True)
-        X = np.vstack((X1, X2))
-        Y = np.concatenate((Y1, Y2))
-        return X, Y
-    else:
-        X, Y = extract_features(
-            X0, Y0, video_indices, WINDOW_SIZE, 
-            is_adding_noise=False, is_print=True)
-        return X, Y
-
+def convert_action_to_int(action, CLASSES):
+    ''' Convert the input '''
+    if action in CLASSES:
+        return CLASSES.index(action)
+        
 # -- Main
 
 
@@ -119,12 +93,14 @@ def main_function():
 
     # Load data
     skeletons, action_class, clip_number = load_numpy_array(ALL_DETECTED_SKELETONS )
-    temp_x, temp_y = extract_features(skeletons, action_class, FEATURE_WINDOW_SIZE )
-    clips = []
-    for i in range(len(labels)):
-        clips.append(labels[i][1]) 
 
-    temp_x, temp_y = extract_features(skeletons, action_class, FEATURE_WINDOW_SIZE )
+    # Process Features
+    print("\nExtracting time-serials features ...")
+    position, velocity, labels = uti_pre_processing.extract_features(skeletons, action_class, clip_number, FEATURE_WINDOW_SIZE)
+    
+    print(f"Points.shape = {position.shape}, Velocity.shape = {velocity.shape}")
+    # Save Features to npz file
+    np.savez(FEATURES, FEATURES_POSITION = position, FEATURES_VELOCITY = velocity, FEATURES_LABELS = labels)
 
 if __name__ == "__main__":
     main_function()
