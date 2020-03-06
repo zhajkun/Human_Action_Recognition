@@ -206,6 +206,85 @@ def rebuild_skeleton_joint_order(skeletons_src):
     # End of rebuild
     return skeletons_dir
 
+def rebuild_skeleton_joint_order_no_head(skeletons_src):
+    ''' Rebuild the input skeleton data, change the chain of orders, some joints will appear
+    multiple times.More informations please check the document.
+    Arguments:
+        skeletons_src {list}: contains the joint position of 18 joints and 36 coordinates(x- and y-), 
+                                returned from utils/uti.openpose.humans_to_skels_list()
+    Returns:
+        skeletons_dir {list}: the skeleton after rebuilded, contains 35 joints --> 70 points 
+    '''
+
+    skeletons_dir = [0]*35*2  # total numer of joints after rebuild (35 joints)
+    
+    
+    # Key joint -- Neck
+    skeletons_dir[0] = skeletons_src[NECK_X]
+    skeletons_dir[1] = skeletons_src[NECK_Y]
+    # Start of joints group 2 -- arms from R to L (R part)
+    skeletons_dir[2] = skeletons_src[R_SHOULDER_X]
+    skeletons_dir[3] = skeletons_src[R_SHOULDER_Y]
+    skeletons_dir[4] = skeletons_src[R_ELBOW_X]
+    skeletons_dir[5] = skeletons_src[R_ELBOW_Y]
+    skeletons_dir[6] = skeletons_src[R_WRIST_X]
+    skeletons_dir[7] = skeletons_src[R_WRIST_Y]
+    skeletons_dir[8] = skeletons_src[R_ELBOW_X]
+    skeletons_dir[9] = skeletons_src[R_ELBOW_Y]
+    skeletons_dir[10] = skeletons_src[R_SHOULDER_X]
+    skeletons_dir[11] = skeletons_src[R_SHOULDER_Y]
+    # End of joints group 2 -- arms from R to L (R part)
+    # Key joint -- Neck
+    skeletons_dir[12] = skeletons_src[NECK_X]
+    skeletons_dir[13] = skeletons_src[NECK_Y]
+    # Start of joints group 2 -- arms from R to L (L part)
+    skeletons_dir[14] = skeletons_src[L_SHOULDER_X]
+    skeletons_dir[15] = skeletons_src[L_SHOULDER_Y]
+    skeletons_dir[16] = skeletons_src[L_ELBOW_X]
+    skeletons_dir[17] = skeletons_src[L_ELBOW_Y]
+    skeletons_dir[18] = skeletons_src[L_WRIST_X]
+    skeletons_dir[19] = skeletons_src[L_WRIST_Y]
+    skeletons_dir[20] = skeletons_src[L_ELBOW_X]
+    skeletons_dir[21] = skeletons_src[L_ELBOW_Y]
+    skeletons_dir[22] = skeletons_src[L_SHOULDER_X]
+    skeletons_dir[23] = skeletons_src[L_SHOULDER_Y]
+    # End of joints group 2 -- arms from R to L (L part)
+    # Key joint -- Neck
+    skeletons_dir[24] = skeletons_src[NECK_X]
+    skeletons_dir[25] = skeletons_src[NECK_Y]
+    # Start of joints group 3 -- legs from R to L (R part)
+    skeletons_dir[26] = skeletons_src[R_HIP_X]
+    skeletons_dir[27] = skeletons_src[R_HIP_Y]
+    skeletons_dir[28] = skeletons_src[R_KNEE_X]
+    skeletons_dir[29] = skeletons_src[R_KNEE_Y]
+    skeletons_dir[30] = skeletons_src[R_ANKLE_X]
+    skeletons_dir[31] = skeletons_src[R_ANKLE_Y]
+    skeletons_dir[32] = skeletons_src[R_KNEE_X]
+    skeletons_dir[33] = skeletons_src[R_KNEE_Y]
+    skeletons_dir[34] = skeletons_src[R_HIP_X]
+    skeletons_dir[35] = skeletons_src[R_HIP_Y]
+    # End of joints group 3 -- legs from R to L (R part)
+    # Key joint --Neck
+    skeletons_dir[36] = skeletons_src[NECK_X]
+    skeletons_dir[37] = skeletons_src[NECK_Y]
+    # Start of joints group 3 -- legs from R to L (L part)
+    skeletons_dir[38] = skeletons_src[L_HIP_X]
+    skeletons_dir[39] = skeletons_src[L_HIP_Y]
+    skeletons_dir[40] = skeletons_src[L_KNEE_X]
+    skeletons_dir[41] = skeletons_src[L_KNEE_Y]
+    skeletons_dir[42] = skeletons_src[L_ANKLE_X]
+    skeletons_dir[43] = skeletons_src[L_ANKLE_Y]
+    skeletons_dir[44] = skeletons_src[L_KNEE_X]
+    skeletons_dir[45] = skeletons_src[L_KNEE_Y]
+    skeletons_dir[46] = skeletons_src[L_HIP_X]
+    skeletons_dir[47] = skeletons_src[L_HIP_Y]
+    # End of joints group 3 -- legs from R to L (L part)
+    # Key joint --Neck
+    skeletons_dir[48] = skeletons_src[NECK_X]
+    skeletons_dir[49] = skeletons_src[NECK_Y]
+    # End of rebuild
+    return skeletons_dir
+    
 def extract_features(
             skeletons, labels, video_indices, window_size):
     ''' From image index and raw skeleton positions,
@@ -214,7 +293,7 @@ def extract_features(
     skeletons_temp = []
     velocity_temp = []
     labels_temp = []
-    N = len(video_indices)
+    iClipsCounter = len(video_indices)
 
     # Loop through all data
     for i, _ in enumerate(video_indices):
@@ -232,7 +311,7 @@ def extract_features(
 
 
         # Print
-        print(f"{i}/{N}", end=", ")
+        print(f"{i}/{iClipsCounter}", end=", ")
             
     skeletons_temp = np.array(skeletons_temp)
     velocity_temp = np.array(velocity_temp)
@@ -267,14 +346,7 @@ class Features_Generator(object):
 
         skeleton = rebuild_skeleton_joint_order(skeleton_src)
 
-    # Add the filter here if need, already branched to filter_v1
-    #    if not ProcFtr.has_neck_and_thigh(skeleton):
-    #        self.reset()
-    #        return False, None
-
-    #    else:
-
-        # -- Preprocess skeleton
+        # Add the filter here if need, already branched to filter_v1
 
         skeleton = np.array(skeleton)
         # Push to deque
@@ -287,7 +359,7 @@ class Features_Generator(object):
         if len(self._skeletons_deque) < self._window_size:
             return False, None, None
         else:
-            # -- Get features of pose/angles/lens
+            # -- Get features of position and velocity
             x_list = self._skeletons_deque
             f_poses = self._deque_features_to_1darray(x_list)
             # f_angles = self._deque_features_to_1darray(self._angles_deque) # deprecate
@@ -309,69 +381,12 @@ class Features_Generator(object):
         if len(self._skeletons_deque) > self._window_size:
             self._skeletons_deque.popleft()
  
-    def _compute_v_center(self, x_deque, step):
-        vel = []
-        for i in range(0, len(x_deque) - step, step):
-            dxdy = x_deque[i+step][0:2] - x_deque[i][0:2]
-            vel += dxdy.tolist()
-        return np.array(vel)
-
     def _compute_v_all_joints(self, xnorm_list, step):
         vel = []
         for i in range(0, len(xnorm_list) - step, step):
             dxdy = xnorm_list[i+step][:] - xnorm_list[i][:]
             vel += dxdy.tolist()
         return np.array(vel)
-
-    def _fill_invalid_data(self, x):
-        ''' Fill the NaN elements in x with
-            their relative-to-neck position in the preious x.
-        Argument:
-            x {np.array}: a skeleton that has a neck and at least a thigh.
-        '''
-        res = x.copy()
-
-        def get_px_py_px0_py0(x):
-            px = x[0::2]  # list of x
-            py = x[1::2]  # list of y
-            px0, py0 = get_joint(x, NECK)  # neck
-            return px, py, px0, py0
-        cur_px, cur_py, cur_px0, cur_py0 = get_px_py_px0_py0(x)
-        cur_height = ProcFtr.get_body_height(x)
-
-        is_lack_knee = check_joint(x, L_KNEE) or check_joint(x, R_KNEE)
-        is_lack_ankle = check_joint(x, L_ANKLE) or check_joint(x, R_ANKLE)
-        if (self._skeletons_prev is None) or is_lack_knee or is_lack_ankle:
-            # If preious data is invalid or there is no knee or ankle,
-            # then fill the data based on the STAND_SKEL_NORMED.
-            for i in range(TOTAL_JOINTS*2):
-                if res[i] == NaN:
-                    res[i] = (cur_px0 if i % 2 == 0 else cur_py0) + \
-                        cur_height * STAND_SKEL_NORMED[i]
-            return res
-
-        pre_px, pre_py, pre_px0, pre_py0 = get_px_py_px0_py0(self._skeletons_prev)
-        pre_height = ProcFtr.get_body_height(self._skeletons_prev)
-
-        scale = cur_height / pre_height
-
-        bad_idxs = np.nonzero(cur_px == NaN)[0]
-        if not len(bad_idxs):  # No invalid data
-            return res
-
-        cur_px[bad_idxs] = cur_px0 + (pre_px[bad_idxs] - pre_px0) * scale
-        cur_py[bad_idxs] = cur_py0 + (pre_py[bad_idxs] - pre_py0) * scale
-        res[::2] = cur_px
-        res[1::2] = cur_py
-        return res
-
-    def _add_noises(self, x, intensity):
-        ''' Add noise to x with a ratio relative to the body height '''
-        height = ProcFtr.get_body_height(x)
-        randoms = (np.random.random(x.shape, ) - 0.5) * 2 * intensity * height
-        x = [(xi + randoms[i] if xi != 0 else xi)
-             for i, xi in enumerate(x)]
-        return x
 
     def _deque_features_to_1darray(self, deque_data):
         features = []

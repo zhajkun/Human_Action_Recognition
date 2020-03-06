@@ -78,7 +78,13 @@ def load_numpy_array(ALL_DETECTED_SKELETONS):
     return skeletons, action_class, video_clips
 
 def convert_action_to_int(action, CLASSES):
-    ''' Convert the input '''
+    ''' Convert the input action class name into the correspoding index intenger
+        Arguments:
+        action {str}: filmed clips action name from text file.
+        CLASSES {list}: all pre defined action classes in config/config.json
+        Return:
+        CLASSES-index {int}: the index of the action
+         '''
     if action in CLASSES:
         return CLASSES.index(action)
         

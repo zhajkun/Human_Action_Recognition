@@ -1,92 +1,93 @@
 {
-    "classes":
-    [
-      "STANDING",
-      "WALKTOME",
-      "WALKING",
-      "WAVING",
-      "PUTINBASKET"
-    ],
+  "classes":
+  [
+    "STANDING",
+    "WALKTOME",
+    "WALKING",
+    "WAVING",
+    "PUTINBASKET"
+  ],
 
-    "IMAGE_FILE_NAME_FORMAT": "{:05d}.jpg",
-    "SKELETON_FILE_NAME_FORMAT": "{:05d}.txt",
-    "VIDEO_FILE_NAME_FORMAT": "{:05d}.avi",
-    "TF_OPENPOSE_LOCATION": "/home/zhaj/tf-pose-estimation",
-    "FEATURE_WINDOW_SIZE": 10,
-    "IMAGES_INFO_INDEX": 0,
-    "CLIP_NUM_INDEX": 1,
-    "ACTION_CLASS_INEDX": 3,
+  "IMAGE_FILE_NAME_FORMAT": "{:05d}.jpg",
+  "SKELETON_FILE_NAME_FORMAT": "{:05d}.txt",
+  "VIDEO_FILE_NAME_FORMAT": "{:05d}.avi",
+  "TF_OPENPOSE_LOCATION": "/home/zhaj/tf-pose-estimation",
+  "FEATURE_WINDOW_SIZE": 10,
+  "IMAGES_INFO_INDEX": 0,
+  "CLIP_NUM_INDEX": 1,
+  "ACTION_CLASS_INEDX": 3,
 
-    "Images_Recorder.py": 
+  "Images_Recorder.py": 
+  {
+
+    "input": 
     {
-
-      "input": 
-      {
-        "RESERVED": "RESERVED"
-      },
-      "output": 
-      {
-        "RECORDED_IMAGES_FOLDER": "data/Data_Images/"
-      }
+      "RESERVED": "RESERVED"
     },
-
-    "s1_get_skeletons_data.py":
+    "output": 
     {
-
-      "openpose":
-      {
-        "MODEL": "cmu",
-        "IMAGE_SIZE": "656x368"
-      },
-      "input":
-      {
-        "IMAGES_LIST": "data/Data_Images/valid_images.txt",
-        "TRAINING_IMAGES_FOLDER": "data/Data_Images/"
-      },
-      "output":
-      {
-        "DETECTED_SKELETONS_FOLDER": "data_proc/Data_Skeletons/DETECTED_SKELETONS_FOLDER/",
-        "IMAGES_WITH_DETECTED_SKELETONS": "data_proc/Data_Images/",
-        "INVALID_IMAGES_FILE": "data_proc/invalid_images.txt"
-      }
-    },
-
-    "s2_pack_all_text_files.py":
-    {
-      "input": 
-      {
-        "DETECTED_SKELETONS_FOLDER": "data_proc/Data_Skeletons/DETECTED_SKELETONS_FOLDER/"
-      },
-      "output": 
-      {
-        "ALL_DETECTED_SKELETONS": "data_proc/Data_Skeletons/all_detected_skeletons.npz",
-        "IMAGES_INFO_SUMMARY": "data_proc/images_info.txt"
-      }
-    },
-    
-    "s3_pre_processing.py":
-    {
-      "input":
-      {
-        "ALL_DETECTED_SKELETONS": "data_proc/Data_Skeletons/all_detected_skeletons.npz"
-      },
-      "output":
-      {
-        "FEATURES": "data_proc/Data_Features/features.npz"     
-      }
-    },
-
-    "train.py":
-    {
-      "input":
-      {
-
-      },
-      "output":
-      {
-        "MODEL_PATH": "model/model.pickle"
-      }
-
+      "RECORDED_IMAGES_FOLDER": "data/Data_Images/"
     }
+  },
+
+  "s1_get_skeletons_data.py":
+  {
+
+    "openpose":
+    {
+      "MODEL": "cmu",
+      "IMAGE_SIZE": "656x368"
+    },
+    "input":
+    {
+      "IMAGES_LIST": "data/Data_Images/valid_images.txt",
+      "TRAINING_IMAGES_FOLDER": "data/Data_Images/"
+    },
+    "output":
+    {
+      "DETECTED_SKELETONS_FOLDER": "data_proc/Data_Skeletons/DETECTED_SKELETONS_FOLDER/",
+      "IMAGES_WITH_DETECTED_SKELETONS": "data_proc/Data_Images/",
+      "INVALID_IMAGES_FILE": "data_proc/invalid_images.txt"
+    }
+  },
+
+  "s2_pack_all_text_files.py":
+  {
+    "input": 
+    {
+      "DETECTED_SKELETONS_FOLDER": "data_proc/Data_Skeletons/DETECTED_SKELETONS_FOLDER/"
+    },
+    "output": 
+    {
+      "ALL_DETECTED_SKELETONS": "data_proc/Data_Skeletons/all_detected_skeletons.npz",
+      "IMAGES_INFO_SUMMARY": "data_proc/images_info.txt"
+    }
+  },
+  
+  "s3_pre_processing.py":
+  {
+    "input":
+    {
+      "ALL_DETECTED_SKELETONS": "data_proc/Data_Skeletons/all_detected_skeletons.npz"
+    },
+    "output":
+    {
+      "FEATURES": "data_proc/Data_Features/features.npz"     
+    }
+  },
+
+  "train.py":
+  {
+    "input":
+    {
+      "FEATURES": "data_proc/Data_Features/features.npz"
+
+    },
+    "output":
+    {
+      "MODEL_PATH": "model/model.pickle"
+    }
+
+  }
 
 }
