@@ -60,11 +60,11 @@ def load_datasets():
 def main():
     datasets_position, datasets_velocity, labels = load_datasets()
 
-    # datasets_position = np.random.rand(100, 5)
-    # np.random.shuffle(datasets_position)
-    # np.random.shuffle(labels)
-    # training, test = datasets_position[:80,:], datasets_position[80:,:]
-    # train_labels, test_labels = labels[:80,:], labels[80:,:]
+    datasets_position = np.random.rand(100, 5)
+    np.random.shuffle(datasets_position)
+    np.random.shuffle(labels)
+    training, test = datasets_position[:80,:], datasets_position[80:,:]
+    train_labels, test_labels = labels[:80,:], labels[80:,:]
 
 
     model = tf.keras.Sequential([
@@ -76,11 +76,11 @@ def main():
                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                 metrics=['accuracy'])
 
-    model.fit(datasets_position, labels, epochs=10)
+    model.fit(training, train_labels, epochs=10)
 
-    # test_loss, test_acc = model.evaluate(datasets_position,  labels, verbose=2)
+    test_loss, test_acc = model.evaluate(test,  test_labels, verbose=2)
 
-    # print('\nTest accuracy:', test_acc)
+    print('\nTest accuracy:', test_acc)
 
 if __name__ == "__main__":
     main()

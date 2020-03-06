@@ -34,6 +34,11 @@ import timeit
 import math
 import functools
 import tensorflow as tf
+import pydot
+import graphviz
+from IPython.display import SVG
+from keras.utils.vis_utils import model_to_dot
+
 # […]
 
 # Own modules
@@ -268,6 +273,13 @@ def cmp(a,b):
 # -- Main
 
 if __name__ == "__main__":
+
+
+    inputs = tf.keras.Input(shape=(3,))
+    x = tf.keras.layers.Dense(4, activation=tf.nn.relu)(inputs)
+    outputs = tf.keras.layers.Dense(5, activation=tf.nn.softmax)(x)
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+
     # with open(ROOT + 'config/config.json') as json_data_file:
     #     cfg_all = json.load(json_data_file)
     #     cfg = cfg_all["Video_Recorder.py"]
@@ -361,37 +373,40 @@ if __name__ == "__main__":
 
 
 
-#     mnist = tf.keras.datasets.mnist
+    mnist = tf.keras.datasets.mnist
+    tf.keras.datasets.mnist.load_data
 
-#     (x_train, y_train), (x_test, y_test) = mnist.load_data()
-#     x_train, x_test = x_train / 255.0, x_test / 255.0
-#     model = tf.keras.models.Sequential([
-#   tf.keras.layers.Flatten(input_shape=(28, 28)),
-#   tf.keras.layers.Dense(128, activation='relu'),
-#   tf.keras.layers.Dropout(0.2),
-#   tf.keras.layers.Dense(10, activation='softmax')])
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    x_train, x_test = x_train / 255.0, x_test / 255.0
+    model = tf.keras.models.Sequential([
+ # tf.keras.layers.Flatten(input_shape=(28, 28)),
+  tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid'),
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Dropout(0.2),
+  tf.keras.layers.Dense(10, activation='softmax')])
 
-#     model.compile(optimizer='adam',
-#               loss='sparse_categorical_crossentropy',
-#               metrics=['accuracy'])
-#     model = tf.keras.models.Sequential([
-#   tf.keras.layers.Flatten(input_shape=(28, 28)),
-#   tf.keras.layers.Dense(128, activation='relu'),
-#   tf.keras.layers.Dropout(0.2),
-#   tf.keras.layers.Dense(10, activation='softmax')
-# ])
+    model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+    model = tf.keras.models.Sequential([
+  tf.keras.layers.Flatten(input_shape=(28, 28)),
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Dropout(0.2),
+  tf.keras.layers.Dense(10, activation='softmax')
+    ])
 
-# model.compile(optimizer='adam',
-#               loss='sparse_categorical_crossentropy',
-#               metrics=['accuracy'])
-# model.fit(x_train, y_train, epochs=5)
+    model.compile(optimizer='adam',
+                loss='sparse_categorical_crossentropy',
+                metrics=['accuracy'])
+    model.fit(x_train, y_train, epochs=1)
+    tf.keras.utils.plot_model(
+    model,
+    to_file='model.fig',
+    show_shapes=False,
+    show_layer_names=True,
+    rankdir='TB',
+    expand_nested=False,
+    dpi=96
+)
 
-# model.evaluate(x_test,  y_test, verbose=2)
 
-
-    sss = [0.29878048780487804, 0.3546195652173913, 0.29878048780487804, 0.37907608695652173, 0.2896341463414634, 0.375, 0, 0, 0, 0, 0.31097560975609756, 0.37907608695652173, 0.31097560975609756, 0.4157608695652174, 0.3048780487804878, 0.4279891304347826, 0.28353658536585363, 0.4483695652173913, 0.3231707317073171, 0.46467391304347827, 0.29878048780487804, 0.5380434782608695, 0.29878048780487804, 0.4483695652173913, 0.32926829268292684, 0.46467391304347827, 0.3231707317073171, 0.5339673913043479, 0.29878048780487804, 0.35054347826086957, 0.3018292682926829, 0.35054347826086957, 0, 0, 0.3079268292682927, 0.3546195652173913]
-
-    xxx = sss[::2]
-    yyy = sss[1::2]
-    print(max(yyy))
-    print(min(yyy))
