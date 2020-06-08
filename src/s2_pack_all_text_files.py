@@ -38,11 +38,8 @@ if True:  # Include project path
     sys.path.append(ROOT)
     
     # Own modules
-    import utils.uti_images_io as uti_images_io
-    import utils.uti_openpose as uti_openpose
-    import utils.uti_skeletons_io as uti_skeletons_io
     import utils.uti_commons as uti_commons
-    import utils.uti_filter as uti_filter
+ 
 # […]
 
 def par(path):  # Pre-Append ROOT to the path if it's not absolute

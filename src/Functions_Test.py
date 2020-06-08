@@ -27,17 +27,14 @@ import sys
 
 # Libs
 import numpy as np 
-import cv2
-import simplejson
+# import cv2
+# import simplejson
 import json
 import timeit
 import math
 import functools
 import tensorflow as tf
-import pydot
-import graphviz
-from IPython.display import SVG
-from keras.utils.vis_utils import model_to_dot
+import time
 
 # […]
 
@@ -47,11 +44,11 @@ if True:
     CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
     sys.path.append(ROOT)
     
-    import utils.uti_images_io as uti_images_io
-    import utils.uti_openpose as uti_openpose
-    import utils.uti_skeletons_io as uti_skeletons_io
-    import utils.uti_commons as uti_commons
-# […]       
+#     import utils.uti_images_io as uti_images_io
+#     import utils.uti_openpose as uti_openpose
+#     import utils.uti_skeletons_io as uti_skeletons_io
+#     import utils.uti_commons as uti_commons
+# # […]       
 def Test_Save_Raw_Skeleton_Data_v1():
     '''Try to extract and display the skeleton data and save it in txt files.'''
     fMax_Framerate = 10
@@ -270,143 +267,38 @@ def cmp(a,b):
     str2 = str(b)+str(a)
     return (str1 > str2) - (str1 < str2)
 
+def get_single_data(file_path, data_index):
+    with np.load(file_path) as data:
+        datasets_position = data['FEATURES_POSITION'][data_index]
+        datasets_velocity = data['FEATURES_VELOCITY'][data_index]
+        labels = data['FEATURES_LABELS'][data_index]
+    return datasets_position, datasets_velocity, labels
 # -- Main
 
 if __name__ == "__main__":
+    data_position = []
+    data_vel = []
+    labels = []
+    start_time = time.time()
+    for ind in range(1):
+        data_p, data_v, label  = get_single_data("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_2.npz", ind)
+        data_position.append(data_p)
+        data_vel.append(data_v)
+        labels.append(label)
+    
+    end_time = time.time()
+    print("Used", end_time-start_time)
 
+    '''
+    print(label)
 
-    inputs = tf.keras.Input(shape=(3,))
-    x = tf.keras.layers.Dense(4, activation=tf.nn.relu)(inputs)
-    outputs = tf.keras.layers.Dense(5, activation=tf.nn.softmax)(x)
-    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+    po_x = data_p[5,:,0]
 
-    # with open(ROOT + 'config/config.json') as json_data_file:
-    #     cfg_all = json.load(json_data_file)
-    #     cfg = cfg_all["Video_Recorder.py"]
+    po_y = data_p[5,:,1]
 
-    #     CLASSES = np.array(cfg_all["classes"])
-    #     SKELETON_FILE_NAME_FORMAT = cfg_all["SKELETON_FILE_NAME_FORMAT"]
-    #     print(CLASSES)
-    #     print(SKELETON_FILE_NAME_FORMAT)
-
-
-
-
-
-    # cap = cv2.VideoCapture(0)
-
-    # # Define the codec and create VideoWriter object
-    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    # out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
-
-    # while(cap.isOpened()):
-    #     ret, frame = cap.read()
-    #     if ret==True:
-    #         frame = cv2.flip(frame,0)
-
-    #         # write the flipped frame
-    #         out.write(frame)
-
-    #         cv2.imshow('frame',frame)
-    #         if cv2.waitKey(1) & 0xFF == ord('q'):
-    #             break
-    #     else:
-    #         break
-
-    # # Release everything if job is finished
-    # cap.release()
-    # out.release()
-    # cv2.destroyAllWindows()
-    # image_filename_format = "{:05d}.jpg"
-    # LEN_IMG_INFO = 5
-    # images_info = list()
-    # images_list = "/home/zhaj/tf_test/Human_Action_Recognition/data/Data_Images/valid_images.txt"
-    # with open(images_list) as f:
-    #     print('ok)')
-
-    #     folder_name = None
-    #     action_label = None
-    #     cnt_action = 0
-    #     actions = set()
-    #     action_images_cnt = dict()
-    #     cnt_clip = 0
-    #     cnt_image = 0
-
-    #     for cnt_line, line in enumerate(f):
-
-    #         if line.find('_') != -1:  # A new video type
-    #             folder_name = line[:-1]
-    #             # print(foldedef cmp(a,b):
-
-    #             # print(action_label)
-    #             if action_label not in actions:
-    #                 cnt_action += 1
-    #                 actions.add(action_label)
-    #                 action_images_cnt[action_label] = 0
-
-    #         elif len(line) > 1:  # line != "\n"
-    #             # print("Line {}, len ={}, {}".format(cnt_line, len(line), line))
-    #             indices = [int(s) for s in line.split()]
-    #             idx_start = indices[0]
-    #             idx_end = indices[1]
-    #             cnt_clip += 1
-    #             for i in range(idx_start, idx_end+1):
-    #                 filepath = folder_name+"/" + image_filename_format.format(i)
-    #                 cnt_image += 1
-    #                 action_images_cnt[action_label] += 1
-
-    #                 # Save: 5 values, which are:action class number, clips number, images number, actions and image file path
-    #                 image_info = [cnt_action, cnt_clip,
-    #                               cnt_image, action_label, filepath]
-    #                 assert(len(image_info) == LEN_IMG_INFO)
-    #                 images_info.append(image_info)
-    #                 # An example: [1, 2, 2, 'STANDING', 'STANDING_01-17-16-39-13-104/00065.jpg']
-
-    #     print("") 
-    #     print("Number of action classes = {}".format(len(actions)))
-    #     print("Number of training images = {}".format(cnt_image))
-    #     print("Number of training images of each action:")
-    #     for action in actions:
-    #         print("  {:>8}| {:>4}|".format(
-    #             action, action_images_cnt[action]))
-
-
-
-
-    mnist = tf.keras.datasets.mnist
-    tf.keras.datasets.mnist.load_data
-
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    x_train, x_test = x_train / 255.0, x_test / 255.0
-    model = tf.keras.models.Sequential([
- # tf.keras.layers.Flatten(input_shape=(28, 28)),
-  tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid'),
-  tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dropout(0.2),
-  tf.keras.layers.Dense(10, activation='softmax')])
-
-    model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
-    model = tf.keras.models.Sequential([
-  tf.keras.layers.Flatten(input_shape=(28, 28)),
-  tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dropout(0.2),
-  tf.keras.layers.Dense(10, activation='softmax')
-    ])
-
-    model.compile(optimizer='adam',
-                loss='sparse_categorical_crossentropy',
-                metrics=['accuracy'])
-    model.fit(x_train, y_train, epochs=1)
-    tf.keras.utils.plot_model(
-    model,
-    to_file='model.fig',
-    show_shapes=False,
-    show_layer_names=True,
-    rankdir='TB',
-    expand_nested=False,
-    dpi=96
-)
-
-
+    import matplotlib.pyplot as plt
+    plt.plot(po_x, po_y, 'rx')
+    plt.xlim(0,1)
+    plt.ylim(1,0)  
+    plt.show() 
+    sys.exit()'''

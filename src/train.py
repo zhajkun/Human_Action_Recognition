@@ -14,8 +14,8 @@ if True:  # Include project path
     CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
     sys.path.append(ROOT)
 
-    import utils.lib_plot as lib_plot
-    from utils.lib_classifier import ClassifierOfflineTrain
+    # import utils.lib_plot as lib_plot
+    # from utils.lib_classifier import ClassifierOfflineTrain
 
 
 
@@ -52,36 +52,78 @@ SHUFFLE_BUFFER_SIZE = 100
 def load_datasets():    
     with np.load(FEATURES_SRC) as data:
         datasets_position = data['FEATURES_POSITION']
-        datasets_velocity = data['FEATURES_VELOCITY']
+        datasets_velocity = data['FEATURES_VELOCITY'] 
         labels = data['FEATURES_LABELS']
     return datasets_position, datasets_velocity, labels
 
+def split_dataset(datasets_position, datasets_velocity, labels):
+    #  if datasets_position
+    return True
+
+def reshape_dataset(list_src):
+    iFrames = 10
+    iJoints = 35
+    iDimenssion = 2
+    zero_metric = np.zeros([1, 35, 2], dtype=float)
+
+    if(len(list_src)>699):
+        list_dir = np.reshape(list_src, (iFrames, iJoints, iDimenssion))
+        list_dir = np.expand_dims(list_dir, axis=0)
+    else:
+        list_dir = np.reshape(list_src, (iFrames-1, iJoints, iDimenssion))
+        list_dir = np.append(list_dir, zero_metric, axis=0)
+        list_dir = np.expand_dims(list_dir, axis=0)
+    return list_dir
 
 def main():
+    # split the datasets, 705 for training, 30% for test
     datasets_position, datasets_velocity, labels = load_datasets()
+    indices = np.random.permutation(datasets_position.shape[0])
+    valid_cnt = int(datasets_position.shape[0] * 0.3)
+    test_idx,training_idx=indices[:valid_cnt],indices[valid_cnt:]
+    test, train = datasets_position[test_idx,:], datasets_position[training_idx,:]
+    test_labels, train_labels = labels[test_idx], labels[training_idx]
+    test_vol, train_vol = datasets_velocity[test_idx,:], datasets_velocity[training_idx]
 
-    datasets_position = np.random.rand(100, 5)
-    np.random.shuffle(datasets_position)
-    np.random.shuffle(labels)
-    training, test = datasets_position[:80,:], datasets_position[80:,:]
-    train_labels, test_labels = labels[:80,:], labels[80:,:]
-
-
-    model = tf.keras.Sequential([
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dense(10)
+    input_shape=(700, 1)
+    l2 = tf.keras.regularizers.l2(l=0.001)
+    model = tf.keras.Sequential([ 
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dropout(0.5),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(96, activation='relu'),
+    tf.keras.layers.Dense(5, activation='relu')
         ])
+    # model = tf.keras.Sequential([
+    #     # tf.keras.layers.Conv1D(filters=64, kernel_size=(3), strides=(1), padding='valid',
+    #     #            use_bias=True),
+    #     tf.keras.layers.Dense(256, activation='relu', use_bias=True, kernel_regularizer=l2),
+    #     # tf.keras.layers.Dropout(0.5),
+    #     tf.keras.layers.Dense(128, activation='relu', use_bias=True),
+    #     tf.keras.layers.Dense(96, activation='relu', use_bias=True),
+    #     tf.keras.layers.Dense(units=5, activation='softmax', use_bias=True)
+    #     ])
 
     model.compile(optimizer='adam',
                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                 metrics=['accuracy'])
 
-    model.fit(training, train_labels, epochs=10)
+    model.fit(train, train_labels, epochs=10)
 
     test_loss, test_acc = model.evaluate(test,  test_labels, verbose=2)
+    model.summary()
 
     print('\nTest accuracy:', test_acc)
 
 if __name__ == "__main__":
-    main()
+    datasets_position, datasets_velocity, labels = load_datasets()
+    # print(datasets_velocity[1])
+    print(datasets_position[1])
+    # print(labels[1])
+    # check_diff = np.diff(datasets_position, n=1, axis=1)
+    test_reshape_pos = reshape_dataset(datasets_position[1])
+    test_reshape_vel = reshape_dataset(datasets_velocity[1])
+    
+    print(test_reshape_pos.shape)
+    print(test_reshape_vel.shape)
     print("Finish")
