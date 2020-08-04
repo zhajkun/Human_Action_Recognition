@@ -35,13 +35,17 @@ import json
 import cv2
 
 # Add tf-pose-estimation project
-ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
-CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
+if True:
+    ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
+    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
+    sys.path.append(ROOT)
 with open(ROOT + 'config/config.json') as json_config_file:
     config_all = json.load(json_config_file)
     LOCAL_OPENPOSE = config_all["TF_OPENPOSE_LOCATION"]
+    OPENPOSE_MODEL = config_all["OPENPOSE_MODEL"]
+    OPENPOSE_IMAGE_SIZE = config_all["OPENPOSE_IMAGE_SIZE"] 
     sys.path.append(ROOT)
-    sys.path.append(ROOT + LOCAL_OPENPOSE)
+    sys.path.append(LOCAL_OPENPOSE)
 # openpose packages
 
 from tf_pose.networks import get_graph_path, model_wh
@@ -50,8 +54,8 @@ from tf_pose import common
 # Own modules
 
 # -- Settings
-MAX_FRACTION_OF_GPU_TO_USE = 0.9
-IS_DRAW_FPS = True
+MAX_FRACTION_OF_GPU_TO_USE = 1
+
 
 # -- Helper functions
 def _set_logger():
@@ -89,14 +93,14 @@ def _iGet_Input_Image_Size_From_String(sImage_Size):
 class Skeleton_Detector(object):
     # This class is mainly copied from https://github.com/ildoonet/tf-pose-estimation
 
-    def __init__(self, sModel="cmu", sImage_Size="432x368"):
+    def __init__(self, sModel=OPENPOSE_MODEL, sImage_Size=OPENPOSE_IMAGE_SIZE):
         ''' Arguments:
-            sModel {str}: "cmu" or "mobilenet_thin".        
+            sModel {str}: "cmu" or "mobilenet_thin". mobilenet_thin is 2-3 times faster than cmu       
             sImage_size {str}: resize input images before they are processed. 
                 Recommends : 432x368, 336x288, 304x240, 656x368, 
         '''
         # -- Check input
-        assert(sModel in ["mobilenet_thin", "cmu"])
+        # assert(sModel in ["mobilenet_thin", "cmu"])
         self._iW, self._iH = _iGet_Input_Image_Size_From_String(sImage_Size)
         
         # -- Set up openpose model
@@ -109,7 +113,7 @@ class Skeleton_Detector(object):
             tf_config=self._config)
         self._prev_t = time.time()
         self._iImage_Counter = 0
-        
+        self._DRAW_FPS = True
         # -- Set logger
         self._logger = _set_logger()
         
@@ -127,7 +131,7 @@ class Skeleton_Detector(object):
                 `TfPoseEstimator.inference` which is defined in
                 `/home/zhaj/tf-pose-estimation/tf_pose/estimator.py`.
 
-                I've written a function `self.humans_to_skeletons_list` to 
+                Use `self.humans_to_skeletons_list` to 
                 extract the skeleton from this `class Human` and save the coordinate of x- and y- axis in one list. 
         '''
 
@@ -156,7 +160,7 @@ class Skeleton_Detector(object):
             humans {a class returned by self.detect}
         '''
         img_disp = TfPoseEstimator.draw_humans(img_disp, humans, imgcopy=False)
-        if IS_DRAW_FPS:
+        if self._DRAW_FPS:
             cv2.putText(img_disp,
                         "fps = {:.1f}".format( (1.0 / (time.time() - self._prev_t) )),
                         (10, 30),  cv2.FONT_HERSHEY_SIMPLEX, 1,
@@ -220,7 +224,7 @@ def test_openpose_on_webcamera():
     img_displayer = Image_Displayer()
     
     # -- Initialize openpose detector    
-    skeleton_detector = Skeleton_Detector("mobilenet_thin", "432x368")
+    skeleton_detector = Skeleton_Detector()
 
     # -- Read image and detect
     import itertools

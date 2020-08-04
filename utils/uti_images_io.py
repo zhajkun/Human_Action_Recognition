@@ -43,7 +43,10 @@ import cv2
 # Own modules
 # from {path} import {class}
 # […]
-
+if True:
+    ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
+    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
+    sys.path.append(ROOT)
 
 # Main functions
 
@@ -54,22 +57,22 @@ class Read_Images_From_Folder(object):
 
     def __init__(self, sFolder_Path):
         self.sFile_Names = sorted(glob.glob(sFolder_Path + "/*"))
-        self.iImages_Counter = 0
+        self._iImages_Counter = 0
         self.sCurrent_File_Name = ""
 
     def Read_Image(self):
-        if self.iImages_Counter >= len(self.sFile_Names):
+        if self._iImages_Counter >= len(self.sFile_Names):
             return None
-        self.sCurrent_File_Name = self.sFile_Names[self.iImages_Counter]
+        self.sCurrent_File_Name = self.sFile_Names[self._iImages_Counter]
         Image = cv2.imread(self.sCurrent_File_Name, cv2.IMREAD_UNCHANGED)
-        self.iImages_Counter += 1
+        self._iImages_Counter += 1
         return Image
 
     def __len__(self):
         return len(self.sFile_Names)
 
     def Image_Captured(self):
-        return self.iImages_Counter < len(self.sFile_Names)
+        return self._iImages_Counter < len(self.sFile_Names)
 
     def Stop(self):
         None
@@ -85,7 +88,7 @@ class Read_Images_From_Video(object):
         if not os.path.exists(sVideo_Path):
             raise IOError("Video does not exist: " + sVideo_Path)
         assert isinstance(iSample_Interval, int) and iSample_Interval >= 1
-        self.iImages_Counter = 0
+        self._iImages_Counter = 0
         self._bIs_Stoped = False
         self._Video_Captured = cv2.VideoCapture(sVideo_Path)
         Success, Image = self._Video_Captured.read()
@@ -100,7 +103,7 @@ class Read_Images_From_Video(object):
         return self._Next_Image is not None
 
     def Get_Current_Video_Time(self):
-        return 1.0 / self._iFPS * self.iImages_Counter
+        return 1.0 / self._iFPS * self._iImages_Counter
 
     def Read_Image(self):
         Image = self._Next_Image
@@ -111,7 +114,7 @@ class Read_Images_From_Video(object):
             else:
                 self._Next_Image = None
                 break
-        self.iImages_Counter += 1
+        self._iImages_Counter += 1
         return Image
 
     def Stop(self):
@@ -145,9 +148,8 @@ class Read_Images_From_Webcam(object):
         # Settings
         self._fMax_Framerate = fMax_Framerate
 
-
         # Initialize video reader
-        self._Video = cv2.VideoCapture(iWebcam_Index)
+        self._Video = cv2.VideoCapture(iWebcam_Index, cv2.CAP_DSHOW)
         self._bIs_Stoped = False
 
         # Maximal Elements to receive
@@ -169,7 +171,7 @@ class Read_Images_From_Webcam(object):
         if fDuration <= self._fMin_Duration:
             time.sleep(self._fMin_Duration - fDuration)
         self._fPrev_Time = time.time()
-        Image = self._Images_Queue.get(timeout=10.0)
+        Image = self._Images_Queue.get(timeout=1)
         return Image
 
     def Image_Captured(self):
@@ -180,17 +182,17 @@ class Read_Images_From_Webcam(object):
         self._Video.release()
         self._bIs_Stoped = True
 
-    def __del__(self):
-        if not self._bIs_Stoped:
-            self.Stop()
+    # def __del__(self):
+    #     if not self._bIs_Stoped:
+    #         self.Stop()
 
     def _Thread_Reading_Webcam_Frames(self):
         while self._Is_Thread_Alive.value:
             Success, Image = self._Video.read()
             if self._Images_Queue.full():  # if queue is full, pop one
-                Image_to_Discard = self._Images_Queue.get(timeout=0.001)
-            self._Images_Queue.put(Image, timeout=0.001)  # push to queue
-        print("Web camera thread is dead.")
+                Image_to_Discard = self._Images_Queue.get(timeout=1)
+            self._Images_Queue.put(Image, timeout=1)  # push to queue
+        print("Webcam thread is dead.")
 
 
 class Video_Writer(object):
@@ -206,7 +208,7 @@ class Video_Writer(object):
         self._fFramerate = fFramerate
 
         # -- Variables
-        self._iImages_Counter = 0
+        self.__iImages_Counter = 0
         # initialize later when the 1st image comes
         self._video_writer = None
         self._Width = None
@@ -219,8 +221,8 @@ class Video_Writer(object):
             sVideo_Path
 
     def write(self, Image):
-        self._iImages_Counter += 1
-        if self._iImages_Counter == 1:  # initialize the video writer
+        self.__iImages_Counter += 1
+        if self.__iImages_Counter == 1:  # initialize the video writer
             fourcc = cv2.VideoWriter_fourcc(*'XVID')  # define the codec
             self._Width = Image.shape[1]
             self._Height = Image.shape[0]
@@ -232,10 +234,10 @@ class Video_Writer(object):
         self.__del__()
 
     def __del__(self):
-        if self._iImages_Counter > 0:
+        if self.__iImages_Counter > 0:
             self._video_writer.release()
             print("Complete writing {}fps and {}s video to {}".format(
-                self._fFramerate, self._iImages_Counter/self._fFramerate, self._sVideo_Path))
+                self._fFramerate, self.__iImages_Counter/self._fFramerate, self._sVideo_Path))
 
         
 class Images_Writer(object):
@@ -251,7 +253,7 @@ class Images_Writer(object):
         self._fFramerate = fFramerate
 
         # -- Variables
-        self._iImages_Counter = 0
+        self.__iImages_Counter = 0
         # initialize later when the 1st image comes
         self._video_writer = None
         self._Width = None
@@ -264,8 +266,8 @@ class Images_Writer(object):
             sVideo_Path
 
     def Write(self, Image):
-        self._iImages_Counter += 1
-        if self._iImages_Counter == 1:  # initialize the video writer
+        self.__iImages_Counter += 1
+        if self.__iImages_Counter == 1:  # initialize the video writer
             fourcc = cv2.VideoWriter_fourcc(*'XVID')  # define the codec
             self._Width = Image.shape[1]
             self._Height = Image.shape[0]
@@ -277,13 +279,12 @@ class Images_Writer(object):
         self.__del__()
 
     def __del__(self):
-        if self._iImages_Counter > 0:
+        if self.__iImages_Counter > 0:
             self._video_writer.release()
             print("Complete writing {}fps and {}s video to {}".format(
-                self._fFramerate, self._iImages_Counter/self._fFramerate, self._sVideo_Path))
+                self._fFramerate, self.__iImages_Counter/self._fFramerate, self._sVideo_Path))
 
 
- 
 class Image_Displayer(object):
     ''' A simple wrapper of using cv2.imshow to display image '''
 
@@ -298,15 +299,31 @@ class Image_Displayer(object):
     def __del__(self):
         cv2.destroyWindow(self._sWindow_Name)
 
+def add_white_region_to_left_of_image(img_disp):
+    r, c, d = img_disp.shape
+    blank = 255 + np.zeros((r, int(c/4), d), np.uint8)
+    img_disp = np.hstack((blank, img_disp))
+    return img_disp
+
+def add_border_to_images(images_src):
+    borderType = cv2.BORDER_CONSTANT
+    top = int(0.0 * images_src.shape[0])
+    bottom = top
+    right = int(0.0 * images_src.shape[1])
+    left = int(0.3 * images_src.shape[1])  # shape[1] = cols
+    value = [255, 255, 255]
+        
+    image_dst = cv2.copyMakeBorder(images_src, top, bottom, left, right, borderType, None, value)
+    return image_dst
 
 def test_Read_From_Webcam():
     ''' Test the class Read_From_Webcam '''
-    Webcam_Reader = Read_Images_From_Webcam(fMax_Framerate=10)
+    Webcam_Reader = Read_Images_From_Webcam(fMax_Framerate=30)
     local_Image_Displayer = Image_Displayer()
     import itertools
     for i in itertools.count():
         Image = Webcam_Reader.Read_Image()
-        if Image is None:
+        if cv2.waitKey(1) == 27:
             break
         print(f"Read {i}th image...")
         local_Image_Displayer.display(Image)
@@ -332,6 +349,6 @@ def test_Read_From_Video():
 
 
 if __name__ == "__main__":
-    test_Read_From_Folder()
-
+    test_Read_From_Webcam()
+    sys.exit(0)
 

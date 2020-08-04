@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Version 1
 
-"""
+'''
 {
     Get skeletons data from source images and store them in output folders with the corespoding images.
     This is the 1. Version of this module, which currently only support reading a skeleton of 1 person.
@@ -20,7 +20,7 @@
         INVALID_IMAGES_FILE 
 }
 {License_info}
-"""
+'''
 
 # Futures
 
@@ -37,58 +37,57 @@ import cv2
 # Libs
 if True:  # Include project path
 
-    ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
-    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
+    ROOT = os.path.dirname(os.path.abspath(__file__))+'/../'
+    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+'/'
     sys.path.append(ROOT)
     
     # Own modules
     import utils.uti_images_io as uti_images_io
     import utils.uti_openpose as uti_openpose
-    import utils.uti_skeletons_io as uti_skeletons_io
     import utils.uti_commons as uti_commons
     import utils.uti_filter as uti_filter
 # […]
 
 def par(path):  # Pre-Append ROOT to the path if it's not absolute
-    return ROOT + path if (path and path[0] != "/") else path
+    return ROOT + path if (path and path[0] != '/') else path
 
 
 # [Settings] Import the settings from config/config-json file
 
 with open(ROOT + 'config/config.json') as json_config_file:
     config_all = json.load(json_config_file)
-    config = config_all["s1_get_skeletons_data.py"]
+    config = config_all['s1_get_skeletons_data.py']
 
     # common settings
 
-    CLASSES = np.array(config_all["classes"])
-    IMAGE_FILE_NAME_FORMAT = config_all["IMAGE_FILE_NAME_FORMAT"]
-    SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
-    IMAGES_INFO_INDEX = config_all["IMAGES_INFO_INDEX"]
+    CLASSES = np.array(config_all['classes'])
+    IMAGE_FILE_NAME_FORMAT = config_all['IMAGE_FILE_NAME_FORMAT']
+    SKELETON_FILE_NAME_FORMAT = config_all['SKELETON_FILE_NAME_FORMAT']
+    IMAGES_INFO_INDEX = config_all['IMAGES_INFO_INDEX']
 
     # openpose
 
-    OPENPOSE_MODEL = config["openpose"]["MODEL"]
-    OPENPOSE_IMAGE_SIZE = config["openpose"]["IMAGE_SIZE"]
+    OPENPOSE_MODEL = config_all['OPENPOSE_MODEL']
+    OPENPOSE_IMAGE_SIZE = config_all['OPENPOSE_IMAGE_SIZE']
 
     # input
 
-    SRC_IMAGES_DESCRIPTION_TXT = par(config["input"]["IMAGES_LIST"])
-    SRC_IMAGES_FOLDER = par(config["input"]["TRAINING_IMAGES_FOLDER"])
+    SRC_IMAGES_DESCRIPTION_TXT = par(config['input']['IMAGES_LIST'])
+    SRC_IMAGES_FOLDER = par(config['input']['TRAINING_IMAGES_FOLDER'])
 
     # output
     
-    DST_DETECTED_SKELETONS_FOLDER = par(config["output"]["DETECTED_SKELETONS_FOLDER"])
-    DST_IMAGES_WITH_DETECTED_SKELETONS = par(config["output"]["IMAGES_WITH_DETECTED_SKELETONS"])
-    INVALID_IMAGES_FILE = par(config["output"]["INVALID_IMAGES_FILE"])
+    DST_DETECTED_SKELETONS_FOLDER = par(config['output']['DETECTED_SKELETONS_FOLDER'])
+    DST_IMAGES_WITH_DETECTED_SKELETONS = par(config['output']['IMAGES_WITH_DETECTED_SKELETONS'])
+    INVALID_IMAGES_FILE = par(config['output']['INVALID_IMAGES_FILE'])
 
 def main_function():
     # set the skeleton detector. The two inputs are: operation model and image size
     Skeleton_Detector = uti_openpose.Skeleton_Detector(OPENPOSE_MODEL, OPENPOSE_IMAGE_SIZE)
     # track_and_label = Skeleton_Tracker()
-    Images_Loader = uti_commons.Read_Valid_Images_And_Action_Class(
-        img_folder = SRC_IMAGES_FOLDER,
-        valid_imgs_txt = SRC_IMAGES_DESCRIPTION_TXT,
+    Images_Loader = uti_commons.Read_Valid_Images(
+        images_folder = SRC_IMAGES_FOLDER,
+        valid_images_txt = SRC_IMAGES_DESCRIPTION_TXT,
         image_filename_format = IMAGE_FILE_NAME_FORMAT)
 
     # Set the images displayer
@@ -101,17 +100,17 @@ def main_function():
     iInvalid_Counter = 0
     list_of_invalid = []
 
-    iTotal_Number_of_Images = Images_Loader.num_images
+    iTotal_Number_of_Images = Images_Loader._num_images
     for iImages_Counter in range(iTotal_Number_of_Images):
         # Load training images
-        Image, sAction_Class, sImage_Info = Images_Loader.read_image()
+        Image, sImage_Info = Images_Loader.read_image()
         # detect humans
         Humans = Skeleton_Detector.detect(Image)
 
         # display detected skeletons on images
         Image_DST = Image.copy()
         Skeleton_Detector.draw(Image_DST, Humans)
-        Images_Displayer.display(Image_DST, 1)
+        Images_Displayer.display(Image_DST)
 
         # save skeletons coordinates to txt files and the sImage_Info with it at the begining
         SKELETONS, SCALE_H = Skeleton_Detector.humans_to_skeletons_list(Humans)
@@ -137,12 +136,13 @@ def main_function():
             list_of_invalid.append(sImage_Name)
         uti_commons.save_listlist(INVALID_IMAGES_FILE, list_of_invalid)
 
-        print(f"{iImages_Counter}/{iTotal_Number_of_Images} th image " f"has {len(SKELETONS_DIR) - 1} people in it")
-    print("Programm End")
+        print(f'{iImages_Counter}/{iTotal_Number_of_Images} th image ' f'has {len(SKELETONS_DIR) - 1} people in it')
+    print('Programm End')
 
 # Main function, defaul to read images from web camera
-if __name__ == "__main__":
-    main_function()
+if __name__ == '__main__':
+    main_function() 
+
 
 
 

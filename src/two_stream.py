@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 # Version
 
-"""
+'''
 {
     first version of two-stream network
 }
 {License_info}
-"""
+'''
 
 # Futures
 
@@ -33,60 +33,63 @@ import matplotlib.pylab as pl
 
 # Own modules
 if True:  # Include project path
-    ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
-    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
+    ROOT = os.path.dirname(os.path.abspath(__file__))+'/../'
+    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+'/'
     sys.path.append(ROOT)
     import utils.uti_data_generator as uti_data_generator
     import utils.uti_commons as uti_commons
 # […]
 
 def par(path):  # Pre-Append ROOT to the path if it's not absolute
-    return ROOT + path if (path and path[0] != "/") else path
+    return ROOT + path if (path and path[0] != '/') else path
 
 # -- Settings
 
 with open(ROOT + 'config/config.json') as json_config_file:
     config_all = json.load(json_config_file)
-    config = config_all["train.py"]
+    config = config_all['train.py']
 
     # common settings
 
-    CLASSES = np.array(config_all["classes"])
-    IMAGE_FILE_NAME_FORMAT = config_all["IMAGE_FILE_NAME_FORMAT"]
-    SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
-    IMAGES_INFO_INDEX = config_all["IMAGES_INFO_INDEX"]
-
-        # openpose
-
+    CLASSES = np.array(config_all['classes'])
+    IMAGE_FILE_NAME_FORMAT = config_all['IMAGE_FILE_NAME_FORMAT']
+    SKELETON_FILE_NAME_FORMAT = config_all['SKELETON_FILE_NAME_FORMAT']
+    IMAGES_INFO_INDEX = config_all['IMAGES_INFO_INDEX']
+    FEATURE_WINDOW_SIZE = config_all['FEATURE_WINDOW_SIZE'] 
+    JOINTS_NUMBER = config_all['JOINTS_NUMBER']
+    CHANELS = config_all['CHANELS']
 
 
     # input
-    FEATURES_SRC = par(config["input"]["FEATURES"])
+
     # output
-    
-    MODEL_PATH = par(config["output"]["MODEL_PATH"])
+
 epochs = 100
-BATCH_SIZE = 64
-SHUFFLE_BUFFER_SIZE = 100
-input_shape = (10,35,2)
+BATCH_SIZE = 32
+input_shape = (FEATURE_WINDOW_SIZE, JOINTS_NUMBER, CHANELS)
 use_bias = True
 graph_path = 'C:/Users/Kun/tf_test/Human_Action_Recognition/model.png'
-feature_path = "C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_split.npz"
-save_path = "C:/Users/Kun/tf_test/Human_Action_Recognition/model"
+train_path = 'C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_train.npz'
+test_path = 'C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_test.npz'
+save_path = 'C:/Users/Kun/tf_test/Human_Action_Recognition/model/two_stream.h5'
 # -- Function
-def load_datasets(feature_path):
+def load_train_datasets(feature_path):
     with np.load(feature_path) as data:
-        train_position = data['FEATURES_POSITION_TRAIN']
-        train_velocity = data['FEATURES_VELOCITY_TRAIN'] 
-        train_labels = data['LABELS_TRAIN']
-        test_position = data['FEATURES_POSITION_TEST']
-        test_velocity = data['FEATURES_VELOCITY_TEST']
-        test_labels = data['LABELS_TEST']
-    return train_position, train_velocity, train_labels, test_position, test_velocity, test_labels
+        train_position = data['POSITION_TRAIN']
+        train_velocity = data['VELOCITY_TRAIN'] 
+        train_labels = data['LABEL_TRAIN']
+    return train_position, train_velocity, train_labels
+
+def load_test_datasets(feature_path):
+    with np.load(feature_path) as data:
+        test_position = data['POSITION_TEST']
+        test_velocity = data['VELOCITY_TEST']
+        test_labels = data['LABEL_TEST']
+    return test_position, test_velocity, test_labels
 
 def shared_stream(x_shape):
     x = tf.keras.Input(shape=x_shape)
-    # x_a = Transformer(d_k, frames)(x)
+
     conv1 = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(x)
         
@@ -102,8 +105,8 @@ def shared_stream(x_shape):
     conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv2)
     conv3 = tf.keras.layers.Activation('relu')(conv3)
-    conv3 = tf.keras.layers.Dropout(0.5)(conv3)
-    conv3 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv3)
+    # conv3 = tf.keras.layers.Dropout(0.5)(conv3)
+    # conv3 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv3)
 
     shared_layer = tf.keras.Model(x, conv3)
     return shared_layer
@@ -146,17 +149,9 @@ def model():
     network = tf.keras.Model(inputs=[up_0, up_1, down_0, down_1], outputs=fc_5)
     return network
     
-def train_on_generator(network):
-    adam = tf.keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-    network.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
-    network.summary()
-    network.fit()
-    train_generator = uti_data_generator()
-    validation_generator = uti_data_generator()
-
 def train_model_on_batch_v1(network):
     adam = tf.keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08) # original setup from paper
-    network.compile(loss='sparse_categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+    network.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
     network.summary()
 
     # network.load_weights(weight_path)
@@ -171,18 +166,19 @@ def train_model_on_batch_v1(network):
     all_tst_loss = []
 
     # load dataset to memory, temp.
-    train_position, train_velocity, train_labels, test_position, test_velocity, test_labels = load_datasets(feature_path)
+    train_position, train_velocity, train_labels = load_train_datasets(train_path)
+    test_position, test_velocity, test_labels = load_test_datasets(test_path)
 
-    train_data = uti_data_generator.Data_Generator("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_split.npz")
-    train_data_sum = train_data.get_data_sum()
+    train_data = uti_data_generator.Data_Generator('C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_train.npz')
+    train_data_sum = train_data.get_train_data_sum()
     train_data_index = np.arange(0, train_data_sum)
     train_data_cursors = train_data.batch_cursors(train_data_sum)
     index_num = len(train_data_cursors)
 
     # test_position = np.expand_dims(test_position, axis=0)
     # test_velocity = np.expand_dims(test_velocity, axis=0)
-    test_data = uti_data_generator.Data_Generator("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_split.npz")
-    test_data_sum = test_data.get_test_sum()
+    test_data = uti_data_generator.Data_Generator('C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_test.npz')
+    test_data_sum = test_data.get_test_data_sum()
     test_data_index = np.arange(0, test_data_sum)
     test_data_cursors = test_data.batch_cursors(test_data_sum)
     test_index_num = len(test_data_cursors)
@@ -203,15 +199,14 @@ def train_model_on_batch_v1(network):
             accuracy_list.append(train_loss[1])
             loss_list.append(train_loss[0])
             if batch_num % 50 == 0:
-                print('the %r batch: loss: %r  accuracy: %r' % (batch_num, train_loss[0], train_loss[1]))
+                print('the {:03d} batch: loss: {:.3f}  accuracy: {:.3%}'.format(batch_num, train_loss[0], train_loss[1]))
 
         epoch_accuracy = sum(accuracy_list) / len(accuracy_list)
         epoch_loss = sum(loss_list) / len(loss_list)
         all_train_accuracy.append(epoch_accuracy)
         all_train_loss.append(epoch_loss)
-        plt.plot()
-        print('the %r epoch: mean loss: %r    mean accuracy: %r' % (epoch + 1, epoch_loss, epoch_accuracy))
 
+        print('the {:03d} epoch: mean loss: {:.3f}    mean accuracy: {:.3%}'.format(epoch + 1, epoch_loss, epoch_accuracy))
 
         if epoch >= epochs-1:
             tst_accuracy_list = []
@@ -229,16 +224,17 @@ def train_model_on_batch_v1(network):
 
             all_tst_accuracy.append(tst_accuracy)
             all_tst_loss.append(tst_loss_output)
-            print('The test data accuracy: %r' % tst_accuracy)
+            print('The test data accuracy: {:.3%}'.format(tst_accuracy))
             if tst_accuracy > model_save_acc:
-                network.save_weights(save_path)
+                network.save(save_path)
                 model_save_acc = tst_accuracy
+                print('Model Saved')
 
-    uti_commons.save_listlist("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/all_train_loss.txt", all_train_loss)
-    uti_commons.save_listlist("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/all_train_acc.txt", all_train_accuracy)
-    uti_commons.save_listlist("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/all_test_loss.txt", all_tst_loss)
-    uti_commons.save_listlist("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/all_test_acc.txt", all_tst_accuracy)
-            
+    uti_commons.save_listlist('C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/all_train_loss.txt', all_train_loss)
+    uti_commons.save_listlist('C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/all_train_acc.txt', all_train_accuracy)
+    uti_commons.save_listlist('C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/all_test_loss.txt', all_tst_loss)
+    uti_commons.save_listlist('C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/all_test_acc.txt', all_tst_accuracy)
+    '''        
     pl.figure()
     trn_acc = pl.subplot(2, 2, 1)
     trn_loss = pl.subplot(2, 2, 2)
@@ -264,14 +260,27 @@ def train_model_on_batch_v1(network):
 
     pl.legend()
     pl.show()
+    '''
+    fig, axes = plt.subplots(2, sharex=True, figsize=(12, 8))
+    fig.suptitle('Training Metrics')
 
-if __name__ == "__main__":
+    axes[0].set_ylabel("Loss", fontsize=14)
+    axes[0].plot(all_train_loss)
+
+    axes[1].set_ylabel("Accuracy", fontsize=14)
+    axes[1].set_xlabel("Epoch", fontsize=14)
+    axes[1].plot(all_train_accuracy)
+    plt.show()
+def train_model(network):
+    pass
+
+if __name__ == '__main__':
     time_start = time.time()
     network = model()
     train_model_on_batch_v1(network)
     time_end = time.time()
-    print("Finish")
-    print("Time Cost:", time_end - time_start, "seconds" )
+    print('Finish')
+    print('Time Cost:', time_end - time_start, 'seconds' )
 
 __author__ = '{author}'
 __copyright__ = 'Copyright {year}, {project_name}'

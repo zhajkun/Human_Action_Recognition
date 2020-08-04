@@ -30,32 +30,6 @@ if True:
     ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
     CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
     sys.path.append(ROOT)
-# […]    mnist = tf.keras.datasets.mnist
-
-#     (x_train, y_train), (x_test, y_test) = mnist.load_data()
-#     x_train, x_test = x_train / 255.0, x_test / 255.0
-#     model = tf.keras.models.Sequential([
-#   tf.keras.layers.Flatten(input_shape=(28, 28)),
-#   tf.keras.layers.Dense(128, activation='relu'),
-#   tf.keras.layers.Dropout(0.2),
-#   tf.keras.layers.Dense(10, activation='softmax')])
-
-#     model.compile(optimizer='adam',
-#               loss='sparse_categorical_crossentropy',
-#               metrics=['accuracy'])
-#     model = tf.keras.models.Sequential([
-#   tf.keras.layers.Flatten(input_shape=(28, 28)),
-#   tf.keras.layers.Dense(128, activation='relu'),
-#   tf.keras.layers.Dropout(0.2),
-#   tf.keras.layers.Dense(10, activation='softmax')
-# ])
-
-# model.compile(optimizer='adam',
-#               loss='sparse_categorical_crossentropy',
-#               metrics=['accuracy'])
-# model.fit(x_train, y_train, epochs=5)
-
-# model.evaluate(x_test,  y_test, verbose=2)
 
 # class Skeleton_Tracker(object):
     '''Skeleton Tracker: first label different skeletons in one image 
@@ -74,6 +48,8 @@ def delete_invalid_skeletons_from_dict(skeletons_src):
         skeletons_dir {list of list}: list without invalid lists
     '''
     skeletons_dir = []
+    invalid_dir = [0]*36
+ 
     for skeleton in skeletons_src:
         s_x = skeleton[::2]
         s_y = skeleton[1::2]
@@ -86,13 +62,26 @@ def delete_invalid_skeletons_from_dict(skeletons_src):
         s_x = s_x[key_joints]
         iValid_Key_Joints = len([x for x in s_x if x != 0])
         fLength_of_Y = max(s_y) - min(s_y)
+        if iValid_Joints >= 8 and fLength_of_Y >= 0.25 and iValid_Key_Joints >= 5:
+            skeletons_dir.append(skeleton)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # IF JOINTS ARE MISSING, TRY CHANGING THESE VALUES:
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        if iValid_Joints >= 8 and fLength_of_Y >= 0.25 and iValid_Key_Joints >= 5:
+   
             # add this skeleton only when all requirements are satisfied
-            skeletons_dir.append(skeleton)
-    return skeletons_dir
+            
+     
+    if not skeletons_dir:
+        return invalid_dir
+    else:
+        return skeletons_dir
+def _add_noises(self, x, intensity):
+    ''' Add noise to x with a ratio relative to the body height '''
+    height = ProcFtr.get_body_height(x)
+    randoms = (np.random.random(x.shape, ) - 0.5) * 2 * intensity * height
+    x = [(xi + randoms[i] if xi != 0 else xi)
+            for i, xi in enumerate(x)]
+    return x
 
 
 

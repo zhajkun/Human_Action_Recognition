@@ -21,6 +21,7 @@ import json
 import random
 import time
 import numpy as np
+import tensorflow as tf
 # […]
 
 # Libs
@@ -37,28 +38,37 @@ with open(ROOT + 'config/config.json') as json_config_file:
     config = config_all["train.py"]
     FEATURE_WINDOW_SIZE = config_all["FEATURE_WINDOW_SIZE"]
     config = config_all["train.py"]
-    FEATURES_SRC = "C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_split.npz"
+
 # Own modules
 # from {path} import {class}
 # […]
 class Data_Generator(object):
 
 
-    def __init__(self, data_path = FEATURES_SRC, batch_size=64, frames=10, iJoints=35, iDimenssion=2):
+    def __init__(self, data_path, batch_size=64, frames=10, iJoints=35, iDimenssion=2):
 
-        self._data_path = FEATURES_SRC
+        self._data_path = data_path
         self._frames = frames
         self._batch_size = batch_size
         self._ijoints = iJoints
         self._iDimenssion = iDimenssion
     
-    def get_data_sum(self):
+    def get_train_data_sum(self):
         '''Read how many "skeleton images" is in this dataset
         Return:
         data_sum {int}: The summe of dataset
         '''
         with np.load(self._data_path) as data:
-            data_sum = data['LABELS_TRAIN'].shape[0]
+            data_sum = data['LABEL_TRAIN'].shape[0]
+        return data_sum
+    
+    def get_test_data_sum(self):
+        '''Read how many "skeleton images" is in this dataset
+        Return:
+        data_sum {int}: The summe of dataset
+        '''
+        with np.load(self._data_path) as data:
+            data_sum = data['LABEL_TEST'].shape[0]
         return data_sum
 
     def batch_cursors(self, data_sum):
@@ -109,7 +119,7 @@ class Data_Generator(object):
 
         batch_data = np.array(batch_data, dtype='float32')
         batch_diff_data = np.array(batch_diff_data, dtype='float32')
-        batch_labels = np.array(batch_labels, dtype='float32')
+        batch_labels = np.reshape(batch_labels, (1, batch_size))
         return batch_data, batch_diff_data, batch_labels
 
     def get_single_data(self, data_index):
@@ -143,13 +153,11 @@ class Data_Generator(object):
 
         batch_data = np.array(batch_data, dtype='float32')
         batch_diff_data = np.array(batch_diff_data, dtype='float32')
-        batch_labels = np.array(batch_labels, dtype='float32')
-        return batch_data, batch_diff_data, batch_labels
-    
-    def get_test_sum(self):
-        with np.load(self._data_path) as data:
-            data_sum = data['LABELS_TEST'].shape[0]
-        return data_sum
+        batch_labels = np.array(batch_labels, dtype='i')
+     
+        from keras.utils import to_categorical
+        batch_labels_bi = to_categorical(batch_labels, num_classes=5)
+        return batch_data, batch_diff_data, batch_labels_bi
     
     def get_test_single_data(self, data_index, test_pos, test_vol, test_label):
         test_position = test_pos[data_index]
@@ -174,8 +182,11 @@ class Data_Generator(object):
 
         test_batch_data = np.array(test_batch_data, dtype='float32')
         test_batch_diff_data = np.array(test_batch_diff_data, dtype='float32')
-        test_batch_labels = np.array(test_batch_labels, dtype='float32')
-        return test_batch_data, test_batch_diff_data, test_batch_labels
+        test_batch_labels = np.array(test_batch_labels, dtype='i')
+
+        from keras.utils import to_categorical
+        test_batch_labels_bi = to_categorical(test_batch_labels, num_classes=5)
+        return test_batch_data, test_batch_diff_data, test_batch_labels_bi
 
 
 
@@ -193,7 +204,6 @@ def main_temp():
     test, train = datasets_position[test_idx,:], datasets_position[training_idx,:]
     test_labels, train_labels = labels[test_idx], labels[training_idx]
     test_vol, train_vol = datasets_velocity[test_idx,:], datasets_velocity[training_idx]
-
 
 def reshape_single_dataset(self, datasets_position_src, datasets_velocity_src, label_src):
     datasets_position_dir = []

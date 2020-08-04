@@ -46,7 +46,7 @@ iFile_Number = args.file
 
 
 if __name__ == "__main__":
-    sFile_Path = 'data_proc/Data_Skeletons/DETECTED_SKELETONS_FOLDER/'
+    sFile_Path = 'C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Skeletons/DETECTED_SKELETONS_FOLDER/'
     sFile_Name = sFile_Path + iFile_Number + '.txt'
     skeletons_src = uti_commons.read_listlist(sFile_Name)
     del skeletons_src[0]
