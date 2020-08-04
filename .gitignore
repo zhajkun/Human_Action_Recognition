@@ -3,6 +3,8 @@ data/*
 data_proc/*
 data_temp/*
 document/*
+Figures/*
+model/*
 utils\__pycache__/*
 
 *.txt
