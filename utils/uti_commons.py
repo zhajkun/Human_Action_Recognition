@@ -34,6 +34,8 @@ import glob
 import numpy as np # Or any other
 import cv2
 import simplejson
+import pickle
+import json
 import datetime
 from time import sleep
 # […]
@@ -46,18 +48,23 @@ if True:
     CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
     sys.path.append(ROOT)
 
+with open(ROOT + 'config/config.json') as json_config_file:
+    config_all = json.load(json_config_file)
+
+    ACTION_CLASSES = config_all['ACTION_CLASSES']
+
 def save_listlist(sFilepath, ll):
     ''' Save a list of lists to file '''
     folder_path = os.path.dirname(sFilepath)
     os.makedirs(folder_path, exist_ok=True)
-    with open(sFilepath, 'w') as f:
-        simplejson.dump(ll, f)
+    with open(sFilepath, 'wb') as f:
+        pickle.dump(ll, f)
 
 
 def read_listlist(sFilepath):
     ''' Read a list of lists from file '''
-    with open(sFilepath, 'r') as f:
-        ll = simplejson.load(f)
+    with open(sFilepath, 'rb') as f:
+        ll = pickle.load(f)
 
     return ll
 
@@ -106,7 +113,7 @@ def get_training_images_info(
         sFolder_Name = None
         sAction_Label = None
         iAction_Counter = -1
-        Actions_Set = set()
+        # Actions_Set = set()
         iAction_Images_Counter = dict()
         iClips_Counter = 0
         iImages_Counter = 0
@@ -116,9 +123,8 @@ def get_training_images_info(
             if line.find('_') != -1:  # is True, when it find the first '_', otherwise t will retuen -1
                 sFolder_Name = line[:-1]
                 sAction_Label = sFolder_Name.split('_')[0]
-                if sAction_Label not in Actions_Set:    # start a new sets when read a new action class
-                    iAction_Counter += 1
-                    Actions_Set.add(sAction_Label)
+                if sAction_Label in ACTION_CLASSES:    # start a new sets when read a new action class
+                    iAction_Counter = ACTION_CLASSES.index(sAction_Label)
                     iAction_Images_Counter[sAction_Label] = 0
 
             elif len(line) > 1:  # The line with all numbers, start adn end indicies of valid images
@@ -139,10 +145,10 @@ def get_training_images_info(
                     # An example: [1, 2, 2, 'STANDING', 'STANDING_01-17-16-39-13-104/00065.jpg']
 
         print("")
-        print("Number of action classes = {}".format(len(Actions_Set)))
+        print("Number of action classes = {}".format(len(ACTION_CLASSES)))
         print("Number of training images = {}".format(iImages_Counter))
         print("Number of training images of each action:")
-        for action in Actions_Set:
+        for action in ACTION_CLASSES:
             print("  {:>12}| {:>4}|".format(
                 action, iAction_Images_Counter[action]))
 
@@ -282,7 +288,7 @@ class Read_Valid_Images(object):
         return self._images_info[index-1]
 ''' Test the functions in this module '''
 if __name__ == "__main__":
-    file = 'C:/Users/Kun/tf_test/Human_Action_Recognition/data/Data_Images/valid_images.txt'
+    file = 'data/Data_Images_10FPS/valid_images.txt'
     s = get_training_images_info(file , image_filename_format="{:05d}.jpg")
     print(s[2])
 
