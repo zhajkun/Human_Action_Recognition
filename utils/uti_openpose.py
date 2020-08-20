@@ -54,7 +54,7 @@ from tf_pose import common
 # Own modules
 
 # -- Settings
-MAX_FRACTION_OF_GPU_TO_USE = 1
+MAX_FRACTION_OF_GPU_TO_USE = 0.1
 
 
 # -- Helper functions
@@ -115,7 +115,7 @@ class Skeleton_Detector(object):
         self._iImage_Counter = 0
         self._DRAW_FPS = True
         # -- Set logger
-        self._logger = _set_logger()
+        # self._logger = _set_logger()
         
 
     def detect(self, image):
@@ -149,7 +149,7 @@ class Skeleton_Detector(object):
 
         # Print result and time cost
         elapsed = time.time() - t
-        self._logger.info('inference image in %.4f seconds.' % (elapsed))
+        # self._logger.info('inference image in %.4f seconds.' % (elapsed))
 
         return humans
     

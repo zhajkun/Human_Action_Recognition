@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Version
 
-"""
+'''
 {
     This Module defines functions for processing skeletons data with tf-openpose
     Some of the functions are copied from 'tf-openpose-estimation' and modified.
@@ -18,7 +18,7 @@
         Skeleton_Detector
 }
 {License_info}
-"""
+'''
 
 # Futures
 
@@ -38,14 +38,14 @@ from collections import deque
 # Own modules
 # Add tf-pose-estimation project
 if True:
-    ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
-    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
+    ROOT = os.path.dirname(os.path.abspath(__file__))+'/../'
+    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+'/'
     sys.path.append(ROOT)
 with open(ROOT + 'config/config.json') as json_config_file:
     config_all = json.load(json_config_file)
-    LOCAL_OPENPOSE = config_all["TF_OPENPOSE_LOCATION"]
-    FEATURE_WINDOW_SIZE = config_all["FEATURE_WINDOW_SIZE"]
-    JOINTS_NUMBER = config_all["JOINTS_NUMBER"]
+    LOCAL_OPENPOSE = config_all['TF_OPENPOSE_LOCATION']
+    FEATURE_WINDOW_SIZE = config_all['FEATURE_WINDOW_SIZE']
+    JOINTS_NUMBER = config_all['JOINTS_NUMBER']
     CHANELS = config_all['CHANELS']
     sys.path.append(ROOT)
     sys.path.append(LOCAL_OPENPOSE)
@@ -351,7 +351,7 @@ class Features_Generator(object):
 
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass
 
 __author__ = '{author}'

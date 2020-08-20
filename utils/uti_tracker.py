@@ -61,7 +61,7 @@ def delete_invalid_skeletons_from_dict(skeletons_src):
         s_x = s_x[key_joints]
         iValid_Key_Joints = len([x for x in s_x if x != 0])
         fLength_of_Y = max(s_y) - min(s_y)
-        if iValid_Joints >= 8 and fLength_of_Y >= 0.25 and iValid_Key_Joints >= 5:
+        if iValid_Joints >= 8 and fLength_of_Y >= 0.25 and iValid_Key_Joints >= 4:
             skeletons_dir.append(skeleton)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # IF JOINTS ARE MISSING, TRY CHANGING THESE VALUES:
