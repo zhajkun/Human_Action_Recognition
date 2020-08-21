@@ -46,7 +46,6 @@ with open(ROOT + 'config/config.json') as json_config_file:
     config_all = json.load(json_config_file)
     config = config_all['Images_Recorder.py']
 
-    CLASSES = np.array(config_all['classes'])
     IMAGE_FILE_NAME_FORMAT = config_all['IMAGE_FILE_NAME_FORMAT']
     RECORDED_IMAGES_FOLDER = config['output']['RECORDED_IMAGES_FOLDER']
 
