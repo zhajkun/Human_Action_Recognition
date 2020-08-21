@@ -35,9 +35,8 @@ if True:
 
 with open(ROOT + 'config/config.json') as json_config_file:
     config_all = json.load(json_config_file)
-    config = config_all["train.py"]
+
     FEATURE_WINDOW_SIZE = config_all["FEATURE_WINDOW_SIZE"]
-    config = config_all["train.py"]
 
 # Own modules
 # from {path} import {class}

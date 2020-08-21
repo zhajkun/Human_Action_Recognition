@@ -43,11 +43,8 @@ def delete_invalid_skeletons_from_dict(skeletons_src):
     '''
 
     skeletons_dir = []
-    invalid_dirs = []
-    invalid_dir = []
-    invalid_dirs.append(invalid_dir)
     if not skeletons_src:
-        return 0
+        return []
 
     for skeleton in skeletons_src:
         s_x = skeleton[::2]

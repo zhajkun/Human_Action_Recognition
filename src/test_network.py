@@ -142,7 +142,7 @@ def draw_scores_on_images(images, scores):
 
             cv2.putText(images, text=s, org=(TXT_X, TXT_Y),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=FONT_SIZE,
-                        color=(0, 0, int(COLOR_INTENSITY)), thickness=2)
+                        color=(0, int(COLOR_INTENSITY), 0), thickness=2)
 
 def main_function():
     iFrames_Counter = -1
@@ -157,9 +157,9 @@ def main_function():
     data_source_type = args.data_source
     data_path = args.data_path
     # select the data source
-    # images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
+    images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
     # images_loader = select_data_source(data_source_type, data_path)
-    images_loader = uti_images_io.Read_Images_From_Folder(TEST_FOLDER)
+    # images_loader = uti_images_io.Read_Images_From_Folder(TEST_FOLDER)
     
     Images_Displayer = uti_images_io.Image_Displayer()
     Featurs_Generator = uti_features_extraction.Features_Generator(FEATURE_WINDOW_SIZE)

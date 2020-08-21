@@ -77,7 +77,6 @@ class Read_Images_From_Folder(object):
     def Stop(self):
         None
 
-
 class Read_Images_From_Video(object):
     def __init__(self, sVideo_Path, iSample_Interval=1):
         ''' Read Images from a video in a given folder, call as module.
@@ -137,9 +136,8 @@ class Read_Images_From_Video(object):
             FPS = self._Video_Captured.get(cv2.CAP_PROP_FPS)
         return FPS
 
-
 class Read_Images_From_Webcam(object):
-    def __init__(self, fMax_Framerate=30.0, iWebcam_Index=0):
+    def __init__(self, fMax_Framerate=10.0, iWebcam_Index=0):
         ''' Read images from Webcam, call as module.
         Argument:
             fMax_Framerate {float}: the maximum value of the camera framerate.
@@ -149,7 +147,7 @@ class Read_Images_From_Webcam(object):
         self._fMax_Framerate = fMax_Framerate
 
         # Initialize video reader
-        self._Video = cv2.VideoCapture(iWebcam_Index, cv2.CAP_DSHOW)
+        self._Video = cv2.VideoCapture(iWebcam_Index) # , cv2.CAP_DSHOW)
         self._bIs_Stoped = False
 
         # Maximal Elements to receive
@@ -171,7 +169,7 @@ class Read_Images_From_Webcam(object):
         if fDuration <= self._fMin_Duration:
             time.sleep(self._fMin_Duration - fDuration)
         self._fPrev_Time = time.time()
-        Image = self._Images_Queue.get(timeout=1)
+        Image = self._Images_Queue.get(timeout=10.0)
         return Image
 
     def Image_Captured(self):
@@ -182,18 +180,17 @@ class Read_Images_From_Webcam(object):
         self._Video.release()
         self._bIs_Stoped = True
 
-    # def __del__(self):
-    #     if not self._bIs_Stoped:
-    #         self.Stop()
+    def __del__(self):
+        if not self._bIs_Stoped:
+            self.Stop()
 
     def _Thread_Reading_Webcam_Frames(self):
         while self._Is_Thread_Alive.value:
             Success, Image = self._Video.read()
             if self._Images_Queue.full():  # if queue is full, pop one
-                Image_to_Discard = self._Images_Queue.get(timeout=1)
-            self._Images_Queue.put(Image, timeout=1)  # push to queue
+                Image_to_Discard = self._Images_Queue.get(timeout=0.001)
+            self._Images_Queue.put(Image, timeout=0.001)  # push to queue
         print("Webcam thread is dead.")
-
 
 class Video_Writer(object):
     def __init__(self, sVideo_Path, fFramerate):
@@ -238,8 +235,7 @@ class Video_Writer(object):
             self._video_writer.release()
             print("Complete writing {}fps and {}s video to {}".format(
                 self._fFramerate, self.__iImages_Counter/self._fFramerate, self._sVideo_Path))
-
-        
+       
 class Images_Writer(object):
     def __init__(self, sImages_Path, fFramerate):
         ''' Read images from web camera, call as module.
@@ -284,7 +280,6 @@ class Images_Writer(object):
             print("Complete writing {}fps and {}s video to {}".format(
                 self._fFramerate, self.__iImages_Counter/self._fFramerate, self._sVideo_Path))
 
-
 class Image_Displayer(object):
     ''' A simple wrapper of using cv2.imshow to display image '''
 
@@ -298,6 +293,22 @@ class Image_Displayer(object):
 
     def __del__(self):
         cv2.destroyWindow(self._sWindow_Name)
+
+class Image_Displayer_with_Infobox(object):
+    ''' A simple wrapper of using cv2.imshow to display image '''
+
+    def __init__(self):
+        self._sWindow_Name = "CV2_Display_Window"
+        cv2.namedWindow(self._sWindow_Name, cv2.WINDOW_NORMAL)
+
+    def display(self, Image, Wait_Key_ms=1):
+        Image_with_border = add_border_to_images(Image)
+        cv2.imshow(self._sWindow_Name, Image_with_border)
+        cv2.waitKey(Wait_Key_ms)
+
+    def __del__(self):
+        cv2.destroyWindow(self._sWindow_Name)
+
 
 def add_white_region_to_left_of_image(img_disp):
     r, c, d = img_disp.shape
@@ -318,7 +329,7 @@ def add_border_to_images(images_src):
 
 def test_Read_From_Webcam():
     ''' Test the class Read_From_Webcam '''
-    Webcam_Reader = Read_Images_From_Webcam(fMax_Framerate=30)
+    Webcam_Reader = Read_Images_From_Webcam(fMax_Framerate=10)
     local_Image_Displayer = Image_Displayer()
     import itertools
     for i in itertools.count():

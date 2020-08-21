@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # Version
 
-"""
+'''
 {
     Load the numpy array and calculate the features, then split the datasets and save them 
     including rebuild the joint order 
 }
 {License_info}
-"""
+'''
 
 # Futures
 
@@ -29,37 +29,37 @@ import numpy as np
 # […]
 
 if True:  # Include project path
-    ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
-    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
+    ROOT = os.path.dirname(os.path.abspath(__file__))+'/../'
+    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+'/'
     sys.path.append(ROOT)
 
     import utils.uti_features_extraction as uti_features_extraction
     import utils.uti_commons as uti_commons
 
 def par(path):  # Pre-Append ROOT to the path if it's not absolute
-    return ROOT + path if (path and path[0] != "/") else path
+    return ROOT + path if (path and path[0] != '/') else path
 
 # -- Settings
 with open(ROOT + 'config/config.json') as json_config_file:
     config_all = json.load(json_config_file)
-    config = config_all["s3_pre_processing.py"]
+    config = config_all['s3_pre_processing.py']
 
     # common settings
 
-    CLASSES = config_all["classes"]
-    IMAGE_FILE_NAME_FORMAT = config_all["IMAGE_FILE_NAME_FORMAT"]
-    SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
-    CLIP_NUM_INDEX = config_all["CLIP_NUM_INDEX"]
-    ACTION_CLASS_INT_INEDX = config_all["ACTION_CLASS_INT_INEDX"]
-    FEATURE_WINDOW_SIZE = config_all["FEATURE_WINDOW_SIZE"]
-    TEST_DATA_SCALE = config_all["TEST_DATA_SCALE"]
+    CLASSES = config_all['classes']
+    IMAGE_FILE_NAME_FORMAT = config_all['IMAGE_FILE_NAME_FORMAT']
+    SKELETON_FILE_NAME_FORMAT = config_all['SKELETON_FILE_NAME_FORMAT']
+    CLIP_NUM_INDEX = config_all['CLIP_NUM_INDEX']
+    ACTION_CLASS_INT_INEDX = config_all['ACTION_CLASS_INT_INEDX']
+    FEATURE_WINDOW_SIZE = config_all['FEATURE_WINDOW_SIZE']
+    TEST_DATA_SCALE = config_all['TEST_DATA_SCALE']
     # input
 
-    ALL_DETECTED_SKELETONS = par(config["input"]["ALL_DETECTED_SKELETONS"])
+    ALL_DETECTED_SKELETONS = par(config['input']['ALL_DETECTED_SKELETONS'])
 
     # output
-    FEATURES_TRAIN = par(config["output"]["FEATURES_TRAIN"])
-    FEATURES_TEST = par(config["output"]["FEATURES_TEST"])
+    FEATURES_TRAIN = par(config['output']['FEATURES_TRAIN'])
+    FEATURES_TEST = par(config['output']['FEATURES_TEST'])
 # -- Functions
 def load_numpy_array(ALL_DETECTED_SKELETONS):
     ''' Load the datasets from npz file
@@ -114,7 +114,7 @@ def extract_features(
 
 
         # Print
-            print(f"{i+1}/{iClipsCounter}", end=", ")
+            print(f'{i+1}/{iClipsCounter}', end=', ')
     positions_temp = np.array(positions_temp)
     velocity_temp = np.array(velocity_temp)
     labels_temp = np.array(labels_temp)
@@ -141,23 +141,23 @@ def main_function():
     skeletons, action_class_int, clip_number = load_numpy_array(ALL_DETECTED_SKELETONS )
     action_class_int = action_class_int 
     # Process Features
-    print("\nExtracting time-serials features ...")
+    print('\nExtracting time-serials features ...')
     position, velocity, labels = extract_features(skeletons, action_class_int, clip_number, FEATURE_WINDOW_SIZE)
     
-    print(f"All Points.shape = {position.shape}, All Velocity.shape = {velocity.shape}")
+    print(f'All Points.shape = {position.shape}, All Velocity.shape = {velocity.shape}')
 
     position_train, velocity_train, label_train, position_test, velocity_test, label_test = shuffle_dataset(position, velocity, labels, TEST_DATA_SCALE)
 
-    print(f"Train Points.shape = {position_train.shape}, Train Velocity.shape = {velocity_train.shape}")
-    print(f"Test Points.shape = {position_test.shape}, Test Velocity.shape = {velocity_test.shape}")
+    print(f'Train Points.shape = {position_train.shape}, Train Velocity.shape = {velocity_train.shape}')
+    print(f'Test Points.shape = {position_test.shape}, Test Velocity.shape = {velocity_test.shape}')
     # Save Features to npz file
     np.savez(FEATURES_TRAIN, POSITION_TRAIN = position_train, VELOCITY_TRAIN = velocity_train, LABEL_TRAIN = label_train)
 
     np.savez(FEATURES_TEST, POSITION_TEST = position_test, VELOCITY_TEST = velocity_test, LABEL_TEST = label_test)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main_function()
-    print("Programms End")
+    print('Programms End')
     
 __author__ = '{author}'
 __copyright__ = 'Copyright {year}, {project_name}'
