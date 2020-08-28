@@ -52,7 +52,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
 
     # common settings
 
-    CLASSES = np.array(config_all['classes'])
+    ACTION_CLASSES = np.array(config_all['ACTION_CLASSES'])
     IMAGE_FILE_NAME_FORMAT = config_all['IMAGE_FILE_NAME_FORMAT']
     SKELETON_FILE_NAME_FORMAT = config_all['SKELETON_FILE_NAME_FORMAT']
     IMAGES_INFO_INDEX = config_all['IMAGES_INFO_INDEX']
@@ -60,7 +60,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
     JOINTS_NUMBER = config_all['JOINTS_NUMBER']
     CHANELS = config_all['CHANELS']
     BATCH_SIZE = config_all['BATCH_SIZE']
-    EPOCHS = 10
+    EPOCHS = 1
 
     # input
 
@@ -91,19 +91,19 @@ def load_test_datasets(feature_path):
 def shared_stream(x_shape):
     x = tf.keras.Input(shape=x_shape)
 
-    conv1 = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), padding='valid',
+    conv1 = tf.keras.layers.Conv2D(filters=32, kernel_size=(5, 5), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(x)
         
-    conv1_1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='valid',
+    conv1_1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(5, 5), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv1)
     # conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
 
-    conv2 = tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='valid',
+    conv2 = tf.keras.layers.Conv2D(filters=128, kernel_size=(5, 5), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv1_1)
     conv2 = tf.keras.layers.Activation('relu')(conv2)
     # conv2 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv2)
 
-    conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='valid',
+    conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv2)
     conv3 = tf.keras.layers.Activation('relu')(conv3)
     # conv3 = tf.keras.layers.Dropout(0.5)(conv3)
@@ -145,7 +145,7 @@ def model():
 
     fc_4 = tf.keras.layers.Dense(units=32, activation='relu', use_bias=True)(fc_3)
 
-    fc_5 = tf.keras.layers.Dense(units=5, activation='softmax', use_bias=True)(fc_4) # units=len(CLASSES)
+    fc_5 = tf.keras.layers.Dense(units=5, activation='softmax', use_bias=True)(fc_4) # units=len(ACTION_CLASSES)
 
     network = tf.keras.Model(inputs=[up_0, up_1, down_0, down_1], outputs=fc_5)
     return network
@@ -235,33 +235,7 @@ def train_model_on_batch_v1(network):
     uti_commons.save_listlist('home/zhaj/tf_test/Human_Action_Recognition/data_proc/all_train_acc.txt', all_train_accuracy)
     uti_commons.save_listlist('home/zhaj/tf_test/Human_Action_Recognition/data_proc/all_test_loss.txt', all_tst_loss)
     uti_commons.save_listlist('home/zhaj/tf_test/Human_Action_Recognition/data_proc/all_test_acc.txt', all_tst_accuracy)
-    '''        
-    pl.figure()
-    trn_acc = pl.subplot(2, 2, 1)
-    trn_loss = pl.subplot(2, 2, 2)
-    # tst_acc = pl.subplot(2, 1, 2)
-
-    pl.sca(trn_acc)
-    pl.plot(range(len(all_train_accuracy)), all_train_accuracy, label='train accuracy')
-    pl.xlabel('Epoch')
-    pl.ylabel('Accuracy')
-    pl.ylim(0.4, 1.0)
-
-    pl.sca(trn_loss)
-    pl.plot(range(len(all_train_loss)), all_train_loss, label='loss')
-    pl.xlabel('Epoch')
-    pl.ylabel('Loss')
-    pl.ylim(0, 5.0)
-
-    # pl.sca(tst_acc)
-    # pl.plot(range(len(all_tst_accuracy)), all_tst_accuracy, label='test accuracy')
-    # pl.xlabel('Epoch')
-    # pl.ylabel('Accuracy')
-    # pl.ylim(0, 1.0)
-
-    pl.legend()
-    pl.show()
-    '''
+    
     fig, axes = plt.subplots(2, sharex=True, figsize=(12, 8))
     fig.suptitle('Training Metrics')
 

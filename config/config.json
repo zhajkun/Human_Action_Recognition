@@ -1,27 +1,44 @@
 {
-  "classes":
+  "ACTION_CLASSES":
   [
     "PUTINBASKET",
-    "WAVING",
+    "SITTING",
     "STANDING",
     "WALKING",
-    "WALKTOME"
+    "WAVING"
   ],
 
   "IMAGE_FILE_NAME_FORMAT": "{:05d}.jpg",
+
   "SKELETON_FILE_NAME_FORMAT": "{:05d}.txt",
+
   "VIDEO_FILE_NAME_FORMAT": "{:05d}.avi",
-  "TF_OPENPOSE_LOCATION": "C:/Users/Kun/tf_test/tf-pose-estimation",
+
+  "TF_OPENPOSE_LOCATION": "/home/zhaj/tf_test/tf-pose-estimation",
+
   "OPENPOSE_MODEL": "mobilenet_thin",
-  "OPENPOSE_IMAGE_SIZE": "656x368",
-  "FEATURE_WINDOW_SIZE": 15,
+
+  "OPENPOSE_IMAGE_SIZE": "432x368",
+
+  "FEATURE_WINDOW_SIZE": 20,
+
   "JOINTS_NUMBER": 35,
+
   "CHANELS": 2,
+
   "IMAGES_INFO_INDEX": 0,
+
   "ACTION_CLASS_INT_INEDX": 0,
+
   "CLIP_NUM_INDEX": 1,
+
   "ACTION_CLASS_STR_INEDX": 3,
-  "TEST_DATA_SCALE": 0.3,
+
+  "TEST_DATA_SCALE": 0.2,
+
+  "BATCH_SIZE": 32,
+
+  "EPOCHS": 100,
 
   "Images_Recorder.py": 
   {
@@ -76,16 +93,29 @@
     }
   },
 
-  "train.py":
+  "train_network.py":
   {
     "input":
     {
-      "FEATURES": "data_proc/Data_Features/features.npz"
-
+      "FEATURES_TRAIN": "data_proc/Data_Features/features_train.npz",
+      "FEATURES_TEST": "data_proc/Data_Features/features_test.npz"    
     },
     "output":
     {
-      "MODEL_PATH": "model/model.pickle"
+      "MODEL_PATH": "model/two_stream.h5"
+    }
+
+  },
+
+  "test_network.py":
+  {
+    "input":
+    {
+      "MODEL_PATH": "model/two_stream.h5"
+    },
+    "output":
+    {
+      
     }
 
   }

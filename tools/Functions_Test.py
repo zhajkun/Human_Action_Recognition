@@ -27,7 +27,7 @@ import sys
 
 # Libs
 import numpy as np 
-# import cv2
+import cv2
 # import simplejson
 import json
 import timeit
@@ -296,46 +296,11 @@ def sort_skeletons_by_dist_to_center(skeletons):
     return sorted_skeletons
 
 if __name__ == "__main__":
-    # data_position = []
-    # data_vel = []
-    # labels = []
-    # start_time = time.time()
-    # for ind in range(1):
-    #     data_p, data_v, label  = get_single_data("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_2.npz", ind)
-    #     data_position.append(data_p)
-    #     data_vel.append(data_v)
-    #     labels.append(label)
-    
-    # end_time = time.time()
-    # print("Used", end_time-start_time)
 
-    '''
-    print(label)
-
-    po_x = data_p[5,:,0]
-
-    po_y = data_p[5,:,1]
-
-    import matplotlib.pyplot as plt
-    plt.plot(po_x, po_y, 'rx')
-    plt.xlim(0,1)
-    plt.ylim(1,0)  
-    plt.show() 
-    sys.exit()
-
-    line = np.arange(0,10,1)
-    line = np.array(line)
-    print(line)
-    line_re = np.reshape(line, (5,2))
-    print(line_re)
-    for i in range(2):
-        print(f'The number now is:{i}')
-'''
-    s = time.time()
-    # list_yesy = [[0,0], [5, 5], [1,1], [2,2],[0.7,0.9] ]
-    list_yesy = [[0.4, 0.5], [0.5, 0.4], [0,0], [5, 5], [1,1], [2,2],[0.7,0.9]]
-    sorted_sks = sort_skeletons_by_dist_to_center(list_yesy)
-    e = time.time()
-    dur = e-s
-    print(sorted_sks)
-    print('This sort cost {:.20f} Seconds'.format(dur))
+    img = cv2.imread('data/Data_Images_10FPS/WALKING_02-06-17-29-30-781/00010.jpg')
+    img_display = cv2.rectangle(img, (0, 0), (200, 200), (0, 255, 255), 2)
+    cv2.namedWindow('CV2_WINDOW', cv2.WINDOW_NORMAL)
+    cv2.imshow('CV2_WINDOW', img_display)
+    cv2.waitKey(0)
+    if cv2.waitKey(1) == 27:
+        cv2.destroyAllWindows()

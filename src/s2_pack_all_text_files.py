@@ -54,7 +54,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
 
     # common settings
 
-    CLASSES = np.array(config_all['classes'])
+    ACTION_CLASSES = np.array(config_all['ACTION_CLASSES'])
     IMAGE_FILE_NAME_FORMAT = config_all['IMAGE_FILE_NAME_FORMAT']
     SKELETON_FILE_NAME_FORMAT = config_all['SKELETON_FILE_NAME_FORMAT']
     CLIP_NUM_INDEX = config_all['CLIP_NUM_INDEX']
@@ -136,7 +136,7 @@ def main_function():
         # get action classes
         labels = read_labels_in_single_text(i)
         action_class = labels[ACTION_CLASS_STR_INEDX]
-        if action_class not in CLASSES:
+        if action_class not in ACTION_CLASSES:
             continue
         all_labels.append(labels)
         Action_Labels[action_class] += 1
@@ -153,7 +153,7 @@ def main_function():
     print(line_2)
     images_infos.write(line_2)
     print('Number of each action: ')
-    for labels in CLASSES:
+    for labels in ACTION_CLASSES:
         line_3 = (f'    {labels}: {Action_Labels[labels]} \n')
         images_infos.write(line_3)
         print(line_3)

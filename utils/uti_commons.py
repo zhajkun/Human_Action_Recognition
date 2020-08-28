@@ -57,14 +57,13 @@ def save_listlist(sFilepath, ll):
     ''' Save a list of lists to file '''
     folder_path = os.path.dirname(sFilepath)
     os.makedirs(folder_path, exist_ok=True)
-    with open(sFilepath, 'wb') as f:
-        pickle.dump(ll, f)
-
+    with open(sFilepath, 'w') as f:
+        simplejson.dump(ll, f)
 
 def read_listlist(sFilepath):
     ''' Read a list of lists from file '''
     with open(sFilepath, 'rb') as f:
-        ll = pickle.load(f)
+        ll = simplejson.load(f)
 
     return ll
 

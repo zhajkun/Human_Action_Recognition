@@ -118,7 +118,7 @@ def main_function():
         # SKELETONS_DIR = [skeleton.tolist() for skeleton in SKELETONS_DICT.values()]
 
 
-        SKELETONS_DIR = uti_filter.delete_invalid_skeletons_from_dict(SKELETONS)
+        SKELETONS_DIR = uti_filter.delete_invalid_skeletons_from_lists(SKELETONS)
         # add the label infos to this skeleton
         SKELETONS_DIR.insert(IMAGES_INFO_INDEX, sImage_Info)
 

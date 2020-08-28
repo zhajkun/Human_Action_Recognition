@@ -46,7 +46,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
 
     # common settings
 
-    CLASSES = config_all['classes']
+    ACTION_CLASSES = config_all['ACTION_CLASSES']
     IMAGE_FILE_NAME_FORMAT = config_all['IMAGE_FILE_NAME_FORMAT']
     SKELETON_FILE_NAME_FORMAT = config_all['SKELETON_FILE_NAME_FORMAT']
     CLIP_NUM_INDEX = config_all['CLIP_NUM_INDEX']
@@ -76,17 +76,17 @@ def load_numpy_array(ALL_DETECTED_SKELETONS):
     video_clips_ndarray = np.array(video_clips, dtype='i')
     return skeletons, action_class_int_ndarray, video_clips_ndarray
 
-def convert_action_to_int(action, CLASSES):
+def convert_action_to_int(action, ACTION_CLASSES):
     ''' Convert the input action class name into the correspoding index intenger, may not need this function, because already stored the action label 
         as intenger in the first place
         Arguments:
         action {str}: filmed clips action name from text file.
-        CLASSES {list}: all pre defined action classes in config/config.json
+        ACTION_CLASSES {list}: all pre defined action classes in config/config.json
         Return:
-        CLASSES-index {int}: the index of the action
+        ACTION_CLASSES-index {int}: the index of the action
          '''
-    if action in CLASSES:
-        return CLASSES.index(action)
+    if action in ACTION_CLASSES:
+        return ACTION_CLASSES.index(action)
 
 def extract_features(
             skeletons, labels, clip_number, window_size):

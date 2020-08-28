@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 import argparse
-import cv2
+
 '''
 # tf.ConfigProto.gpu_options.allow_growth=True
 # tf.ConfigProto.gpu_options.per_process_gpu_memory_fraction=0.4
@@ -81,7 +81,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
     MODEL_PATH = par(config['input']['MODEL_PATH'])
     # output
 
-TEST_FOLDER = 'data_test/UNDEFINED_08-20-15-49-28-094/'
+TEST_FOLDER = 'data/Data_Images_10FPS/WALKING_01-17-16-44-50-670/'
 RESULT_LIST = 'home/zhaj/tf_test/Human_Action_Recognition/data_proc/results.txt'
 
 def argument_parser():
@@ -124,27 +124,9 @@ def select_data_source(data_source, data_path):
             10, webcam_idx)
     return images_loader
 
-def draw_scores_on_images(images, scores):
-        if scores is None:
-            return
-
-        for i in range(0, len(CLASSES)):
-
-            FONT_SIZE = 0.7
-            TXT_X = 20
-            TXT_Y = 150 + i*30
-            COLOR_INTENSITY = 255
-
-
-            label = CLASSES[i]
-            s = "{:<5}: {:.2f}".format(label, scores[i])
-            COLOR_INTENSITY *= (0.0 + 1.0 * scores[i])**0.5
-
-            cv2.putText(images, text=s, org=(TXT_X, TXT_Y),
-                        fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=FONT_SIZE,
-                        color=(0, int(COLOR_INTENSITY), 0), thickness=2)
-
 def main_function():
+
+    # initialize the frames counter at -1, so the first incomming frames is 0
     iFrames_Counter = -1
     # initialize the skeleton detector
     skeleton_detector = uti_openpose.Skeleton_Detector(OPENPOSE_MODEL, OPENPOSE_IMAGE_SIZE)
@@ -156,21 +138,24 @@ def main_function():
 
     data_source_type = args.data_source
     data_path = args.data_path
+
     # select the data source
+    #
     images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
     # images_loader = select_data_source(data_source_type, data_path)
     # images_loader = uti_images_io.Read_Images_From_Folder(TEST_FOLDER)
     
+    # initialize the skeleton detector   
     Images_Displayer = uti_images_io.Image_Displayer()
+    
+    # initialize the skeleton detector
     Featurs_Generator = uti_features_extraction.Features_Generator(FEATURE_WINDOW_SIZE)
+
+    #################################################################################################
     
     prediction_history = []
     predict_scores_0 = []
-    predict_scores_1 = []
-    predict_scores_2 = []
-    predict_scores_3 = []
-    predict_scores_4 = []
-    
+   
     positions_temp = []
     velocity_temp = []
     prev_skeletons = []
@@ -178,7 +163,7 @@ def main_function():
     invalid_skeletons_counter = 0
 
     while images_loader.Image_Captured():
-
+     
         # iterate the frames counter by 1
         iFrames_Counter += 1
 
@@ -189,41 +174,53 @@ def main_function():
         humans = skeleton_detector.detect(images_src)
 
         # convert human(s) to 2d coordinates in a list(of lists)
-        skeletons_lists, scale_h = skeleton_detector.humans_to_skeletons_list(humans)
-
-        # copy the soucr frame to diaplay
-        images_display = images_src.copy()
-
-        # draw detected human(s) to frame
-        skeleton_detector.draw(images_display, humans)
+        skeletons_lists_src, scale_h = skeleton_detector.humans_to_skeletons_list(humans)
         
-        skeletons_lists = uti_tracker.delete_invalid_skeletons_from_dict(skeletons_lists)
+        # delete invalid skeletons from lists
+        skeletons_lists = uti_tracker.delete_invalid_skeletons_from_lists(skeletons_lists_src)
 
-        if cv2.waitKey(1) == 27:
-            break
+        if not skeletons_lists and not Featurs_Generator._skeletons_deque:
+            
+            images_display = images_src.copy()
 
-        if not skeletons_lists:
-
-            invalid_skeletons_counter += 1
             Images_Displayer.display(images_display)
+            
             prediction_history.insert(iFrames_Counter, [0]*5)
 
-            # if openpose starts to give out skeletons but there were some frames failed, use the previous skeletons for 
-            if invalid_skeletons_counter <= 4 and prev_skeletons:
+            continue
+        # if Features_generator starts to store skeletons for features, but there were some frames failed, 
+        # use the previous skeletons for 
+        elif not skeletons_lists and Featurs_Generator._skeletons_deque and prev_skeletons:
+            
+            if invalid_skeletons_counter <=5:
+                # use previous list
                 skeletons_lists = prev_skeletons
+                
+                # increase invalid skeletons counter by 1
+                invalid_skeletons_counter += 1
 
             else:
                 Featurs_Generator._reset()
                 invalid_skeletons_counter = 0
+                prev_skeletons = []
+
+                images_display = images_src.copy()
+
+                Images_Displayer.display(images_display)
+                
+                prediction_history.insert(iFrames_Counter, [0]*5)
+
                 continue
 
-
         prev_skeletons = skeletons_lists
+        
         success, features_x, features_xs = Featurs_Generator.calculate_features(skeletons_lists)
+        
         prediction_history.insert(iFrames_Counter, [0]*5)
+        
         if success:  # True if (data length > 5) and (skeleton has enough joints)
-            # positions_temp.append(features_x)       
-            # velocity_temp.append(features_xs)
+        # positions_temp.append(features_x)       
+        # velocity_temp.append(features_xs)
 
             positions_temp = np.array(features_x, dtype=float)
             velocity_temp = np.array(features_xs, dtype=float)
@@ -237,24 +234,52 @@ def main_function():
             down_1 = velocity_temp
         
             prediction = Nerwork.predict([up_0, up_1, down_0, down_1])
-            draw_scores_on_images(images_display, prediction[0])
-            Images_Displayer.display(images_display)
-            print(f'\nPredict {iFrames_Counter}th Frame ...')
-            print('Predicted: Put in basket: {:.3%}'.format(prediction[0][0]))
-            print('Predicted: Standing: {:.3%}'.format(prediction[0][1]))
-            print('Predicted: Walking: {:.3%}'.format(prediction[0][2]))
-            print('Predicted: Walk to me: {:.3%}'.format(prediction[0][3]))
-            print('Predicted: Waving: {:.3%}'.format(prediction[0][4]))
-            prediction_history[iFrames_Counter]  = prediction[0]
-        else:
+
+            images_display = images_src.copy()
+
+            skeleton_detector.draw(images_display, humans)
+
+            uti_images_io.draw_scores_for_one_person_on_image(images_display, prediction[0])
+
+            skeleton_src = skeletons_lists[0]
+
+            skeleton_src[1::2] = np.divide(skeleton_src[1::2], scale_h)
+
+            images_display = uti_images_io.draw_bounding_box_for_one_person_on_image(images_display, skeleton_src)
+
             Images_Displayer.display(images_display)
 
-    predict_scores_0.append(prediction_history[iFrames_Counter])
+            print(f'\nPredict {iFrames_Counter}th Frame ...')
+            print('Predicted: Put in basket: {:.3%}'.format(prediction[0][0]))
+            print('Predicted: Sitting: {:.3%}'.format(prediction[0][1]))
+            print('Predicted: Standing: {:.3%}'.format(prediction[0][2]))
+            print('Predicted: Walking: {:.3%}'.format(prediction[0][3]))
+            print('Predicted: Waving: {:.3%}'.format(prediction[0][4]))
+
+            prediction_history[iFrames_Counter]  = prediction[0].tolist()
+
+        else:
+
+            images_display = images_src.copy()
+
+            skeleton_detector.draw(images_display, humans)
+
+            skeleton_src = skeletons_lists[0]
+
+            skeleton_src[1::2] = np.divide(skeleton_src[1::2], scale_h)
+
+            images_display = uti_images_io.draw_bounding_box_for_one_person_on_image(images_display, skeleton_src)
+
+    
+            Images_Displayer.display(images_display)
+
+        predict_scores_0.append(prediction_history[iFrames_Counter])
 
     uti_commons.save_listlist('data_proc/prediction_0.txt', predict_scores_0)
         # uti_commons.save_listlist('data_proc/prediction_1.txt', predict_scores_1)
         # uti_commons.save_listlist('data_proc/prediction_2.txt', predict_scores_2)
         # uti_commons.save_listlist('data_proc/prediction_3.txt', predict_scores_3)
         # uti_commons.save_listlist('data_proc/prediction_4.txt', predict_scores_4)
+
 if __name__ == '__main__':
     main_function()

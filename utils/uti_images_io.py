@@ -33,6 +33,8 @@ import warnings
 import glob
 import queue
 import threading
+import json
+import math
 # […]
 
 # Libs
@@ -47,7 +49,9 @@ if True:
     ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
     CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
     sys.path.append(ROOT)
-
+with open(ROOT + 'config/config.json') as json_config_file:
+    config_all = json.load(json_config_file)
+    ACTION_CLASSES = config_all["ACTION_CLASSES"]
 # Main functions
 
 class Read_Images_From_Folder(object):
@@ -309,6 +313,7 @@ class Image_Displayer_with_Infobox(object):
     def __del__(self):
         cv2.destroyWindow(self._sWindow_Name)
 
+# Functions
 
 def add_white_region_to_left_of_image(img_disp):
     r, c, d = img_disp.shape
@@ -327,6 +332,71 @@ def add_border_to_images(images_src):
     image_dst = cv2.copyMakeBorder(images_src, top, bottom, left, right, borderType, None, value)
     return image_dst
 
+def draw_scores_for_one_person_on_image(images, scores):
+    '''
+    Draw predicted scores for the first person on images, the first person is the nearest person to image center
+    
+    '''
+    if scores is None:
+        return
+
+    for i in range(0, len(ACTION_CLASSES)):
+
+        FONT_SIZE = 0.7
+        TXT_X = 20
+        TXT_Y = 150 + i*30
+        COLOR_INTENSITY = 255
+
+
+        label = ACTION_CLASSES[i]
+        s = "{:<5}: {:.2f}".format(label, scores[i])
+        COLOR_INTENSITY *= (0.0 + 1.0 * scores[i])**0.5
+
+        cv2.putText(images, text=s, org=(TXT_X, TXT_Y),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=FONT_SIZE,
+                    color=(0, int(COLOR_INTENSITY), 0), thickness=2)
+
+def draw_bounding_box_for_one_person_on_image(image_src, skeleton_src):
+    '''
+    '''
+    minx = 999
+    miny = 999
+    maxx = -999
+    maxy = -999
+    i = 0
+    NaN = 0
+
+    while i < len(skeleton_src):
+        if not(skeleton_src[i] == NaN or skeleton_src[i+1] == NaN):
+            minx = min(minx, skeleton_src[i])
+            maxx = max(maxx, skeleton_src[i])
+            miny = min(miny, skeleton_src[i+1])
+            maxy = max(maxy, skeleton_src[i+1])
+        i += 2
+
+    minx = int(minx * image_src.shape[1])
+    miny = int(miny * image_src.shape[0])
+    maxx = int(maxx * image_src.shape[1])
+    maxy = int(maxy * image_src.shape[0])
+
+    # Draw bounding box
+    # drawBoxToImage(img_display, [minx, miny], [maxx, maxy])
+    img_display = cv2.rectangle(
+        image_src, (minx, miny), (maxx, maxy), (0, 255, 0), 4)
+
+    # Draw text at left corner
+    box_scale = max(
+        0.5, min(2.0, (1.0*(maxx - minx)/image_src.shape[1] / (0.3))**(0.5)))
+    fontsize = 1.4 * box_scale
+    linewidth = int(math.ceil(3 * box_scale))
+
+    TEST_COL = int(minx + 5 * box_scale)
+    TEST_ROW = int(miny - 10 * box_scale)
+    return img_display
+    
+def draw_confusion_matrxi_for_training():
+    pass
+# local test function
 def test_Read_From_Webcam():
     ''' Test the class Read_From_Webcam '''
     Webcam_Reader = Read_Images_From_Webcam(fMax_Framerate=10)
@@ -355,9 +425,6 @@ def test_Read_From_Video():
         print(f"Read {i}th image...")
         local_Image_Displayer.display(Image)
     print("Program ends")
-
-
-
 
 if __name__ == "__main__":
     test_Read_From_Webcam()

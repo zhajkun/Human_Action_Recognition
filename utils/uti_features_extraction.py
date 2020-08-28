@@ -106,6 +106,8 @@ def rebuild_skeleton_joint_order(skeletons_src):
         skeletons_dir {list of lists}: the skeleton after rebuilded, contains 35 joints --> 70 points 
     '''
     skeletons_dirs = []
+    if not skeletons_src:
+         return []
     for skeleton in skeletons_src:
         skeletons_dir = [0]*35*2  # total numer of joints after rebuild (35 joints)
         # if not skeletons_src:
@@ -201,6 +203,113 @@ def rebuild_skeleton_joint_order(skeletons_src):
     skeletons_dirs.append(skeletons_dir)
 
     return skeletons_dir
+
+def rebuild_skeleton_joint_order_by_training(skeleton):
+    ''' Rebuild the input skeleton data, change the chain of orders, some joints will appear
+    multiple times.More informations please check the document.
+    Arguments:
+        skeletons_src {list of lists}: contains the joint position of 18 joints and 36 coordinates(x- and y-), 
+                                returned from utils/uti.openpose.humans_to_skels_list()
+    Returns:
+        skeletons_dir {list of lists}: the skeleton after rebuilded, contains 35 joints --> 70 points 
+    '''
+    skeletons_dirs = []
+    # for skeleton in skeletons_src:
+    skeletons_dir = [0]*35*2  # total numer of joints after rebuild (35 joints)
+    # if not skeletons_src:
+    #     skeletons_src = skeletons_dir
+    # skeletons_src = skeletons_src[0]
+    # Key joint -- Neck
+    skeletons_dir[0] = skeleton[NECK_X]
+    skeletons_dir[1] = skeleton[NECK_Y]
+    # Start of joints group 1 -- face from R to L
+    skeletons_dir[2] = skeleton[NOSE_X]
+    skeletons_dir[3] = skeleton[NOSE_Y]
+    skeletons_dir[4] = skeleton[R_EYE_X]
+    skeletons_dir[5] = skeleton[R_EYE_Y]
+    skeletons_dir[6] = skeleton[R_EAR_X]
+    skeletons_dir[7] = skeleton[R_EAR_Y]
+    skeletons_dir[8] = skeleton[R_EYE_X]
+    skeletons_dir[9] = skeleton[R_EYE_Y]
+    skeletons_dir[10] = skeleton[NOSE_X]
+    skeletons_dir[11] = skeleton[NOSE_Y]
+    skeletons_dir[12] = skeleton[L_EYE_X]
+    skeletons_dir[13] = skeleton[L_EYE_Y]
+    skeletons_dir[14] = skeleton[L_EAR_X]
+    skeletons_dir[15] = skeleton[L_EAR_Y]
+    skeletons_dir[16] = skeleton[L_EYE_X]
+    skeletons_dir[17] = skeleton[L_EYE_Y]
+    skeletons_dir[18] = skeleton[NOSE_X]
+    skeletons_dir[19] = skeleton[NOSE_Y]
+    # End of joints group 1 -- face from R to L
+    # Key joint -- Neck
+    skeletons_dir[20] = skeleton[NECK_X]
+    skeletons_dir[21] = skeleton[NECK_Y]
+    # Start of joints group 2 -- arms from R to L (R part)
+    skeletons_dir[22] = skeleton[R_SHOULDER_X]
+    skeletons_dir[23] = skeleton[R_SHOULDER_Y]
+    skeletons_dir[24] = skeleton[R_ELBOW_X]
+    skeletons_dir[25] = skeleton[R_ELBOW_Y]
+    skeletons_dir[26] = skeleton[R_WRIST_X]
+    skeletons_dir[27] = skeleton[R_WRIST_Y]
+    skeletons_dir[28] = skeleton[R_ELBOW_X]
+    skeletons_dir[29] = skeleton[R_ELBOW_Y]
+    skeletons_dir[30] = skeleton[R_SHOULDER_X]
+    skeletons_dir[31] = skeleton[R_SHOULDER_Y]
+    # End of joints group 2 -- arms from R to L (R part)
+    # Key joint -- Neck
+    skeletons_dir[32] = skeleton[NECK_X]
+    skeletons_dir[33] = skeleton[NECK_Y]
+    # Start of joints group 2 -- arms from R to L (L part)
+    skeletons_dir[34] = skeleton[L_SHOULDER_X]
+    skeletons_dir[35] = skeleton[L_SHOULDER_Y]
+    skeletons_dir[36] = skeleton[L_ELBOW_X]
+    skeletons_dir[37] = skeleton[L_ELBOW_Y]
+    skeletons_dir[38] = skeleton[L_WRIST_X]
+    skeletons_dir[39] = skeleton[L_WRIST_Y]
+    skeletons_dir[40] = skeleton[L_ELBOW_X]
+    skeletons_dir[41] = skeleton[L_ELBOW_Y]
+    skeletons_dir[42] = skeleton[L_SHOULDER_X]
+    skeletons_dir[43] = skeleton[L_SHOULDER_Y]
+    # End of joints group 2 -- arms from R to L (L part)
+    # Key joint -- Neck
+    skeletons_dir[44] = skeleton[NECK_X]
+    skeletons_dir[45] = skeleton[NECK_Y]
+    # Start of joints group 3 -- legs from R to L (R part)
+    skeletons_dir[46] = skeleton[R_HIP_X]
+    skeletons_dir[47] = skeleton[R_HIP_Y]
+    skeletons_dir[48] = skeleton[R_KNEE_X]
+    skeletons_dir[49] = skeleton[R_KNEE_Y]
+    skeletons_dir[50] = skeleton[R_ANKLE_X]
+    skeletons_dir[51] = skeleton[R_ANKLE_Y]
+    skeletons_dir[52] = skeleton[R_KNEE_X]
+    skeletons_dir[53] = skeleton[R_KNEE_Y]
+    skeletons_dir[54] = skeleton[R_HIP_X]
+    skeletons_dir[55] = skeleton[R_HIP_Y]
+    # End of joints group 3 -- legs from R to L (R part)
+    # Key joint --Neck
+    skeletons_dir[56] = skeleton[NECK_X]
+    skeletons_dir[57] = skeleton[NECK_Y]
+    # Start of joints group 3 -- legs from R to L (L part)
+    skeletons_dir[58] = skeleton[L_HIP_X]
+    skeletons_dir[59] = skeleton[L_HIP_Y]
+    skeletons_dir[60] = skeleton[L_KNEE_X]
+    skeletons_dir[61] = skeleton[L_KNEE_Y]
+    skeletons_dir[62] = skeleton[L_ANKLE_X]
+    skeletons_dir[63] = skeleton[L_ANKLE_Y]
+    skeletons_dir[64] = skeleton[L_KNEE_X]
+    skeletons_dir[65] = skeleton[L_KNEE_Y]
+    skeletons_dir[66] = skeleton[L_HIP_X]
+    skeletons_dir[67] = skeleton[L_HIP_Y]
+    # End of joints group 3 -- legs from R to L (L part)
+    # Key joint --Neck
+    skeletons_dir[68] = skeleton[NECK_X]
+    skeletons_dir[69] = skeleton[NECK_Y]
+    # End of rebuild
+    skeletons_dirs.append(skeletons_dir)
+
+    return skeletons_dir
+
 
 def rebuild_skeleton_joint_order_no_head(skeletons_src):
     ''' Rebuild the input skeleton data, change the chain of orders, some joints will appear
@@ -306,7 +415,7 @@ class Features_Generator(object):
                 the historical input skeletons are more than self._window_size.
             features {np.array} 
         '''
-
+        # skeleton = rebuild_skeleton_joint_order(skeleton_src)
         skeleton = rebuild_skeleton_joint_order(skeleton_src)
 
         # Add the filter here if need, already branched to filter_v1
@@ -347,9 +456,6 @@ class Features_Generator(object):
             velocity.append(dxdy.tolist())
         velocity.append(zeros_end)
         return np.array(velocity)
-
-
-
 
 if __name__ == '__main__':
     pass
