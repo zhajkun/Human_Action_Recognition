@@ -106,7 +106,14 @@ def extract_features(
             Features_Generator = uti_features_extraction.Features_Generator(window_size)
         
         # Get features
-        success, features_x, features_xs = Features_Generator.calculate_features(skeletons[i, :])
+        skeletons_rebuild = uti_features_extraction.rebuild_skeleton_joint_order_no_head_by_training(skeletons[i, :])
+
+        skeletons_rebuild_lists = []
+
+        skeletons_rebuild_lists.insert(0, skeletons_rebuild)
+
+        success, features_x, features_xs = Features_Generator.calculate_features(skeletons_rebuild_lists)
+
         if success:  # True if (data length > 5) and (skeleton has enough joints)
             positions_temp.append(features_x)       
             velocity_temp.append(features_xs)
@@ -139,7 +146,7 @@ def main_function():
 
     # Load data
     skeletons, action_class_int, clip_number = load_numpy_array(ALL_DETECTED_SKELETONS )
-    action_class_int = action_class_int 
+   
     # Process Features
     print('\nExtracting time-serials features ...')
     position, velocity, labels = extract_features(skeletons, action_class_int, clip_number, FEATURE_WINDOW_SIZE)
@@ -158,12 +165,4 @@ def main_function():
 if __name__ == '__main__':
     main_function()
     print('Programms End')
-    
-__author__ = '{author}'
-__copyright__ = 'Copyright {year}, {project_name}'
-__credits__ = ['{credit_list}']
-__license__ = '{license}'
-__version__ = '{mayor}.{minor}.{rel}'
-__maintainer__ = '{maintainer}'
-__email__ = '{contact_email}'
-__status__ = '{dev_status}'
+

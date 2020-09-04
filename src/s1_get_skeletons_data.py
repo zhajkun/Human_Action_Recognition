@@ -45,7 +45,7 @@ if True:  # Include project path
     import utils.uti_images_io as uti_images_io
     import utils.uti_openpose as uti_openpose
     import utils.uti_commons as uti_commons
-    import utils.uti_filter as uti_filter
+    import utils.uti_tracker as uti_tracker
 # […]
 
 def par(path):  # Pre-Append ROOT to the path if it's not absolute
@@ -115,10 +115,7 @@ def main_function():
         SKELETONS, SCALE_H = Skeleton_Detector.humans_to_skeletons_list(Humans)
         # SKELETONS_DICT = track_and_label.track(SKELETONS)
 
-        # SKELETONS_DIR = [skeleton.tolist() for skeleton in SKELETONS_DICT.values()]
-
-
-        SKELETONS_DIR = uti_filter.delete_invalid_skeletons_from_lists(SKELETONS)
+        SKELETONS_DIR = uti_tracker.delete_invalid_skeletons_from_lists(SKELETONS)
         # add the label infos to this skeleton
         SKELETONS_DIR.insert(IMAGES_INFO_INDEX, sImage_Info)
 
@@ -141,22 +138,3 @@ def main_function():
 # Main function, defaul to read images from web camera
 if __name__ == '__main__':
     main_function() 
-
-
-
-
-
-
-
-
-
-
-
-__author__ = '{author}'
-__copyright__ = 'Copyright {year}, {project_name}'
-__credits__ = ['{credit_list}']
-__license__ = '{license}'
-__version__ = '{mayor}.{minor}.{rel}'
-__maintainer__ = '{maintainer}'
-__email__ = '{contact_email}'
-__status__ = '{dev_status}'

@@ -60,7 +60,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
     JOINTS_NUMBER = config_all['JOINTS_NUMBER']
     CHANELS = config_all['CHANELS']
     BATCH_SIZE = config_all['BATCH_SIZE']
-    EPOCHS = 1
+    EPOCHS = 240
 
     # input
 
@@ -91,26 +91,26 @@ def load_test_datasets(feature_path):
 def shared_stream(x_shape):
     x = tf.keras.Input(shape=x_shape)
 
-    conv1 = tf.keras.layers.Conv2D(filters=32, kernel_size=(5, 5), strides=(1, 1), padding='valid',
+    conv1 = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(x)
         
-    conv1_1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(5, 5), strides=(1, 1), padding='valid',
+    conv1_1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv1)
     # conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
 
-    conv2 = tf.keras.layers.Conv2D(filters=128, kernel_size=(5, 5), strides=(1, 1), padding='valid',
+    conv2 = tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv1_1)
     conv2 = tf.keras.layers.Activation('relu')(conv2)
     # conv2 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv2)
 
-    conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='valid',
+    conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv2)
     conv3 = tf.keras.layers.Activation('relu')(conv3)
     # conv3 = tf.keras.layers.Dropout(0.5)(conv3)
     # conv3 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv3)
 
-    shared_layer = tf.keras.Model(x, conv3)
-    return shared_layer
+    shared_layers = tf.keras.Model(x, conv3)
+    return shared_layers
 
 def model():
     up_0 = tf.keras.layers.Input(shape=input_shape, name='up_stream_0')
@@ -137,7 +137,7 @@ def model():
     feature = tf.keras.layers.concatenate([up_feature, down_feature])
 
     fc_1 = tf.keras.layers.Dense(units=256, activation='relu', use_bias=True, kernel_regularizer=l2(0.001))(feature)
-    fc_1 = tf.keras.layers.Dropout(0.5)(fc_1)
+    # fc_1 = tf.keras.layers.Dropout(0.5)(fc_1)
 
     fc_2 = tf.keras.layers.Dense(units=128, activation='relu', use_bias=True)(fc_1)
 
@@ -170,7 +170,7 @@ def train_model_on_batch_v1(network):
     train_position, train_velocity, train_labels = load_train_datasets(FEATURES_TRAIN)
     test_position, test_velocity, test_labels = load_test_datasets(FEATURES_TEST)
 
-    train_data = uti_data_generator.Data_Generator(FEATURES_TRAIN)
+    train_data = uti_data_generator.Data_Generator(FEATURES_TRAIN, BATCH_SIZE)
     train_data_sum = train_data.get_train_data_sum()
     train_data_index = np.arange(0, train_data_sum)
     train_data_cursors = train_data.batch_cursors(train_data_sum)
@@ -178,7 +178,7 @@ def train_model_on_batch_v1(network):
 
     # test_position = np.expand_dims(test_position, axis=0)
     # test_velocity = np.expand_dims(test_velocity, axis=0)
-    test_data = uti_data_generator.Data_Generator(FEATURES_TEST)
+    test_data = uti_data_generator.Data_Generator(FEATURES_TEST, BATCH_SIZE)
     test_data_sum = test_data.get_test_data_sum()
     test_data_index = np.arange(0, test_data_sum)
     test_data_cursors = test_data.batch_cursors(test_data_sum)
@@ -187,6 +187,8 @@ def train_model_on_batch_v1(network):
     for epoch in range(EPOCHS):
         accuracy_list = []
         loss_list = []
+        test_accuracy_list = []
+        test_loss_list = []
         print(epoch + 1, ' epoch is beginning......')
         '''
         '''
@@ -209,7 +211,9 @@ def train_model_on_batch_v1(network):
 
         print('the {:03d} epoch: mean loss: {:.3f}    mean accuracy: {:.3%}'.format(epoch + 1, epoch_loss, epoch_accuracy))
 
-        if epoch >= EPOCHS - 1:
+
+
+        if epoch >= 100:
             tst_accuracy_list = []
             tst_loss_list = []
             for num in range(test_index_num):
@@ -231,10 +235,10 @@ def train_model_on_batch_v1(network):
                 model_save_acc = tst_accuracy
                 print('Model Saved')
 
-    uti_commons.save_listlist('home/zhaj/tf_test/Human_Action_Recognition/data_proc/all_train_loss.txt', all_train_loss)
-    uti_commons.save_listlist('home/zhaj/tf_test/Human_Action_Recognition/data_proc/all_train_acc.txt', all_train_accuracy)
-    uti_commons.save_listlist('home/zhaj/tf_test/Human_Action_Recognition/data_proc/all_test_loss.txt', all_tst_loss)
-    uti_commons.save_listlist('home/zhaj/tf_test/Human_Action_Recognition/data_proc/all_test_acc.txt', all_tst_accuracy)
+    uti_commons.save_listlist('training_infos/all_train_loss.txt', all_train_loss)
+    uti_commons.save_listlist('training_infos/all_train_acc.txt', all_train_accuracy)
+    uti_commons.save_listlist('training_infos/all_test_loss.txt', all_tst_loss)
+    uti_commons.save_listlist('training_infos/all_test_acc.txt', all_tst_accuracy)
     
     fig, axes = plt.subplots(2, sharex=True, figsize=(12, 8))
     fig.suptitle('Training Metrics')
@@ -245,7 +249,7 @@ def train_model_on_batch_v1(network):
     axes[1].set_ylabel('Accuracy', fontsize=14)
     axes[1].set_xlabel('Epoch', fontsize=14)
     axes[1].plot(all_train_accuracy)
-    plt.show()
+    plt.savefig('training_infos/2s_head.png')
 
 def train_model(network):
     pass

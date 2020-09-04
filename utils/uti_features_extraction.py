@@ -202,7 +202,7 @@ def rebuild_skeleton_joint_order(skeletons_src):
         # End of rebuild
     skeletons_dirs.append(skeletons_dir)
 
-    return skeletons_dir
+    return skeletons_dirs
 
 def rebuild_skeleton_joint_order_by_training(skeleton):
     ''' Rebuild the input skeleton data, change the chain of orders, some joints will appear
@@ -306,10 +306,9 @@ def rebuild_skeleton_joint_order_by_training(skeleton):
     skeletons_dir[68] = skeleton[NECK_X]
     skeletons_dir[69] = skeleton[NECK_Y]
     # End of rebuild
-    skeletons_dirs.append(skeletons_dir)
+
 
     return skeletons_dir
-
 
 def rebuild_skeleton_joint_order_no_head(skeletons_src):
     ''' Rebuild the input skeleton data, change the chain of orders, some joints will appear
@@ -321,90 +320,180 @@ def rebuild_skeleton_joint_order_no_head(skeletons_src):
         skeletons_dir {list}: the skeleton after rebuilded, contains 35 joints --> 70 points 
     '''
 
-    skeletons_dir = [0]*35*2  # total numer of joints after rebuild (35 joints)
+    skeletons_dirs = []
+    if not skeletons_src:
+         return []
+    for skeleton in skeletons_src:
+        skeletons_dir = [0]*25*2  # total numer of joints after rebuild (35 joints)
     
     
+        # Key joint -- Neck
+        skeletons_dir[0] = skeleton[NECK_X]
+        skeletons_dir[1] = skeleton[NECK_Y]
+        # Start of joints group 2 -- arms from R to L (R part)
+        skeletons_dir[2] = skeleton[R_SHOULDER_X]
+        skeletons_dir[3] = skeleton[R_SHOULDER_Y]
+        skeletons_dir[4] = skeleton[R_ELBOW_X]
+        skeletons_dir[5] = skeleton[R_ELBOW_Y]
+        skeletons_dir[6] = skeleton[R_WRIST_X]
+        skeletons_dir[7] = skeleton[R_WRIST_Y]
+        skeletons_dir[8] = skeleton[R_ELBOW_X]
+        skeletons_dir[9] = skeleton[R_ELBOW_Y]
+        skeletons_dir[10] = skeleton[R_SHOULDER_X]
+        skeletons_dir[11] = skeleton[R_SHOULDER_Y]
+        # End of joints group 2 -- arms from R to L (R part)
+        # Key joint -- Neck
+        skeletons_dir[12] = skeleton[NECK_X]
+        skeletons_dir[13] = skeleton[NECK_Y]
+        # Start of joints group 2 -- arms from R to L (L part)
+        skeletons_dir[14] = skeleton[L_SHOULDER_X]
+        skeletons_dir[15] = skeleton[L_SHOULDER_Y]
+        skeletons_dir[16] = skeleton[L_ELBOW_X]
+        skeletons_dir[17] = skeleton[L_ELBOW_Y]
+        skeletons_dir[18] = skeleton[L_WRIST_X]
+        skeletons_dir[19] = skeleton[L_WRIST_Y]
+        skeletons_dir[20] = skeleton[L_ELBOW_X]
+        skeletons_dir[21] = skeleton[L_ELBOW_Y]
+        skeletons_dir[22] = skeleton[L_SHOULDER_X]
+        skeletons_dir[23] = skeleton[L_SHOULDER_Y]
+        # End of joints group 2 -- arms from R to L (L part)
+        # Key joint -- Neck
+        skeletons_dir[24] = skeleton[NECK_X]
+        skeletons_dir[25] = skeleton[NECK_Y]
+        # Start of joints group 3 -- legs from R to L (R part)
+        skeletons_dir[26] = skeleton[R_HIP_X]
+        skeletons_dir[27] = skeleton[R_HIP_Y]
+        skeletons_dir[28] = skeleton[R_KNEE_X]
+        skeletons_dir[29] = skeleton[R_KNEE_Y]
+        skeletons_dir[30] = skeleton[R_ANKLE_X]
+        skeletons_dir[31] = skeleton[R_ANKLE_Y]
+        skeletons_dir[32] = skeleton[R_KNEE_X]
+        skeletons_dir[33] = skeleton[R_KNEE_Y]
+        skeletons_dir[34] = skeleton[R_HIP_X]
+        skeletons_dir[35] = skeleton[R_HIP_Y]
+        # End of joints group 3 -- legs from R to L (R part)
+        # Key joint --Neck
+        skeletons_dir[36] = skeleton[NECK_X]
+        skeletons_dir[37] = skeleton[NECK_Y]
+        # Start of joints group 3 -- legs from R to L (L part)
+        skeletons_dir[38] = skeleton[L_HIP_X]
+        skeletons_dir[39] = skeleton[L_HIP_Y]
+        skeletons_dir[40] = skeleton[L_KNEE_X]
+        skeletons_dir[41] = skeleton[L_KNEE_Y]
+        skeletons_dir[42] = skeleton[L_ANKLE_X]
+        skeletons_dir[43] = skeleton[L_ANKLE_Y]
+        skeletons_dir[44] = skeleton[L_KNEE_X]
+        skeletons_dir[45] = skeleton[L_KNEE_Y]
+        skeletons_dir[46] = skeleton[L_HIP_X]
+        skeletons_dir[47] = skeleton[L_HIP_Y]
+        # End of joints group 3 -- legs from R to L (L part)
+        # Key joint --Neck
+        skeletons_dir[48] = skeleton[NECK_X]
+        skeletons_dir[49] = skeleton[NECK_Y]
+        # End of rebuild
+        skeletons_dirs.append(skeletons_dir)
+    return skeletons_dirs
+
+def rebuild_skeleton_joint_order_no_head_by_training(skeleton):
+    ''' Rebuild the input skeleton data, change the chain of orders, some joints will appear
+    multiple times.More informations please check the document.
+    Arguments:
+        skeletons_src {list of lists}: contains the joint position of 18 joints and 36 coordinates(x- and y-), 
+                                returned from utils/uti.openpose.humans_to_skels_list()
+    Returns:
+        skeletons_dir {list of lists}: the skeleton after rebuilded, contains 35 joints --> 70 points 
+    '''
+    # for skeleton in skeletons_src:
+    skeletons_dir = [0]*25*2  # total numer of joints after rebuild (35 joints)
+    # if not skeletons_src:
+    #     skeletons_src = skeletons_dir
+    # skeletons_src = skeletons_src[0]
     # Key joint -- Neck
-    skeletons_dir[0] = skeletons_src[NECK_X]
-    skeletons_dir[1] = skeletons_src[NECK_Y]
+        # Key joint -- Neck
+    skeletons_dir[0] = skeleton[NECK_X]
+    skeletons_dir[1] = skeleton[NECK_Y]
     # Start of joints group 2 -- arms from R to L (R part)
-    skeletons_dir[2] = skeletons_src[R_SHOULDER_X]
-    skeletons_dir[3] = skeletons_src[R_SHOULDER_Y]
-    skeletons_dir[4] = skeletons_src[R_ELBOW_X]
-    skeletons_dir[5] = skeletons_src[R_ELBOW_Y]
-    skeletons_dir[6] = skeletons_src[R_WRIST_X]
-    skeletons_dir[7] = skeletons_src[R_WRIST_Y]
-    skeletons_dir[8] = skeletons_src[R_ELBOW_X]
-    skeletons_dir[9] = skeletons_src[R_ELBOW_Y]
-    skeletons_dir[10] = skeletons_src[R_SHOULDER_X]
-    skeletons_dir[11] = skeletons_src[R_SHOULDER_Y]
+    skeletons_dir[2] = skeleton[R_SHOULDER_X]
+    skeletons_dir[3] = skeleton[R_SHOULDER_Y]
+    skeletons_dir[4] = skeleton[R_ELBOW_X]
+    skeletons_dir[5] = skeleton[R_ELBOW_Y]
+    skeletons_dir[6] = skeleton[R_WRIST_X]
+    skeletons_dir[7] = skeleton[R_WRIST_Y]
+    skeletons_dir[8] = skeleton[R_ELBOW_X]
+    skeletons_dir[9] = skeleton[R_ELBOW_Y]
+    skeletons_dir[10] = skeleton[R_SHOULDER_X]
+    skeletons_dir[11] = skeleton[R_SHOULDER_Y]
     # End of joints group 2 -- arms from R to L (R part)
     # Key joint -- Neck
-    skeletons_dir[12] = skeletons_src[NECK_X]
-    skeletons_dir[13] = skeletons_src[NECK_Y]
+    skeletons_dir[12] = skeleton[NECK_X]
+    skeletons_dir[13] = skeleton[NECK_Y]
     # Start of joints group 2 -- arms from R to L (L part)
-    skeletons_dir[14] = skeletons_src[L_SHOULDER_X]
-    skeletons_dir[15] = skeletons_src[L_SHOULDER_Y]
-    skeletons_dir[16] = skeletons_src[L_ELBOW_X]
-    skeletons_dir[17] = skeletons_src[L_ELBOW_Y]
-    skeletons_dir[18] = skeletons_src[L_WRIST_X]
-    skeletons_dir[19] = skeletons_src[L_WRIST_Y]
-    skeletons_dir[20] = skeletons_src[L_ELBOW_X]
-    skeletons_dir[21] = skeletons_src[L_ELBOW_Y]
-    skeletons_dir[22] = skeletons_src[L_SHOULDER_X]
-    skeletons_dir[23] = skeletons_src[L_SHOULDER_Y]
+    skeletons_dir[14] = skeleton[L_SHOULDER_X]
+    skeletons_dir[15] = skeleton[L_SHOULDER_Y]
+    skeletons_dir[16] = skeleton[L_ELBOW_X]
+    skeletons_dir[17] = skeleton[L_ELBOW_Y]
+    skeletons_dir[18] = skeleton[L_WRIST_X]
+    skeletons_dir[19] = skeleton[L_WRIST_Y]
+    skeletons_dir[20] = skeleton[L_ELBOW_X]
+    skeletons_dir[21] = skeleton[L_ELBOW_Y]
+    skeletons_dir[22] = skeleton[L_SHOULDER_X]
+    skeletons_dir[23] = skeleton[L_SHOULDER_Y]
     # End of joints group 2 -- arms from R to L (L part)
     # Key joint -- Neck
-    skeletons_dir[24] = skeletons_src[NECK_X]
-    skeletons_dir[25] = skeletons_src[NECK_Y]
+    skeletons_dir[24] = skeleton[NECK_X]
+    skeletons_dir[25] = skeleton[NECK_Y]
     # Start of joints group 3 -- legs from R to L (R part)
-    skeletons_dir[26] = skeletons_src[R_HIP_X]
-    skeletons_dir[27] = skeletons_src[R_HIP_Y]
-    skeletons_dir[28] = skeletons_src[R_KNEE_X]
-    skeletons_dir[29] = skeletons_src[R_KNEE_Y]
-    skeletons_dir[30] = skeletons_src[R_ANKLE_X]
-    skeletons_dir[31] = skeletons_src[R_ANKLE_Y]
-    skeletons_dir[32] = skeletons_src[R_KNEE_X]
-    skeletons_dir[33] = skeletons_src[R_KNEE_Y]
-    skeletons_dir[34] = skeletons_src[R_HIP_X]
-    skeletons_dir[35] = skeletons_src[R_HIP_Y]
+    skeletons_dir[26] = skeleton[R_HIP_X]
+    skeletons_dir[27] = skeleton[R_HIP_Y]
+    skeletons_dir[28] = skeleton[R_KNEE_X]
+    skeletons_dir[29] = skeleton[R_KNEE_Y]
+    skeletons_dir[30] = skeleton[R_ANKLE_X]
+    skeletons_dir[31] = skeleton[R_ANKLE_Y]
+    skeletons_dir[32] = skeleton[R_KNEE_X]
+    skeletons_dir[33] = skeleton[R_KNEE_Y]
+    skeletons_dir[34] = skeleton[R_HIP_X]
+    skeletons_dir[35] = skeleton[R_HIP_Y]
     # End of joints group 3 -- legs from R to L (R part)
     # Key joint --Neck
-    skeletons_dir[36] = skeletons_src[NECK_X]
-    skeletons_dir[37] = skeletons_src[NECK_Y]
+    skeletons_dir[36] = skeleton[NECK_X]
+    skeletons_dir[37] = skeleton[NECK_Y]
     # Start of joints group 3 -- legs from R to L (L part)
-    skeletons_dir[38] = skeletons_src[L_HIP_X]
-    skeletons_dir[39] = skeletons_src[L_HIP_Y]
-    skeletons_dir[40] = skeletons_src[L_KNEE_X]
-    skeletons_dir[41] = skeletons_src[L_KNEE_Y]
-    skeletons_dir[42] = skeletons_src[L_ANKLE_X]
-    skeletons_dir[43] = skeletons_src[L_ANKLE_Y]
-    skeletons_dir[44] = skeletons_src[L_KNEE_X]
-    skeletons_dir[45] = skeletons_src[L_KNEE_Y]
-    skeletons_dir[46] = skeletons_src[L_HIP_X]
-    skeletons_dir[47] = skeletons_src[L_HIP_Y]
+    skeletons_dir[38] = skeleton[L_HIP_X]
+    skeletons_dir[39] = skeleton[L_HIP_Y]
+    skeletons_dir[40] = skeleton[L_KNEE_X]
+    skeletons_dir[41] = skeleton[L_KNEE_Y]
+    skeletons_dir[42] = skeleton[L_ANKLE_X]
+    skeletons_dir[43] = skeleton[L_ANKLE_Y]
+    skeletons_dir[44] = skeleton[L_KNEE_X]
+    skeletons_dir[45] = skeleton[L_KNEE_Y]
+    skeletons_dir[46] = skeleton[L_HIP_X]
+    skeletons_dir[47] = skeleton[L_HIP_Y]
     # End of joints group 3 -- legs from R to L (L part)
     # Key joint --Neck
-    skeletons_dir[48] = skeletons_src[NECK_X]
-    skeletons_dir[49] = skeletons_src[NECK_Y]
+    skeletons_dir[48] = skeleton[NECK_X]
+    skeletons_dir[49] = skeleton[NECK_Y]
     # End of rebuild
+
+
     return skeletons_dir
 
 ##############################################################################################################
 
 class Features_Generator(object):
-    def __init__(self, feature_window_size):
+    
+    def __init__(self, FEATURE_WINDOW_SIZE):
         '''
         Arguments:
             feature_window_size {int}: Number of adjacent frames for extracting features, defined in config/config.json 
         '''
-        self._window_size = feature_window_size
+        self._window_size = FEATURE_WINDOW_SIZE
         self._reset()
 
     def _reset(self):
         ''' Reset the Feature_Generator '''
         self._skeletons_deque = deque()
-        # self._skeletons_prev = None
+        # self._velocity_deque = deque()
+        self._skeletons_prev = None
 
     def calculate_features(self, skeleton_src):
         ''' Input a new skeleton, return the extracted feature.
@@ -415,12 +504,12 @@ class Features_Generator(object):
                 the historical input skeletons are more than self._window_size.
             features {np.array} 
         '''
-        # skeleton = rebuild_skeleton_joint_order(skeleton_src)
-        skeleton = rebuild_skeleton_joint_order(skeleton_src)
+        # skeleton = rebuild_skeleton_joint_order_no_head(skeleton_src)
+        # skeleton = rebuild_skeleton_joint_order_by_training(skeleton_src)
 
         # Add the filter here if need, already branched to filter_v1
 
-        skeleton = np.array(skeleton)
+        skeleton = np.array(skeleton_src)
         # Push to deque
         self._skeletons_deque.append(skeleton)
 
@@ -447,13 +536,14 @@ class Features_Generator(object):
     def _maintain_deque_size(self):
         if len(self._skeletons_deque) == self._window_size:
             self._skeletons_deque.popleft()
+            # self._velocity_deque.popleft()
  
     def _calculate_velocity_in_deque(self, positions, step):
         velocity = []
         zeros_end = [0] * (JOINTS_NUMBER * CHANELS)
-        for i in range(len(positions) - 1):
+        for i in range(0, len(positions) - 1, step):
             dxdy = positions[i+step][:] - positions[i][:]
-            velocity.append(dxdy.tolist())
+            velocity += dxdy.tolist()
         velocity.append(zeros_end)
         return np.array(velocity)
 

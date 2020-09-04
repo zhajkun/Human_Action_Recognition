@@ -251,7 +251,7 @@ class Read_Valid_Images(object):
             img {RGB image}: 
                 Next RGB image from folder. 
             img_info {list}: 
-                Something like [1, 7, 54, "jump", "jump_03-02-12-34-01-795/00240.jpg"]
+                Something like [1, 2, 2, 'STANDING', 'STANDING_01-17-16-39-13-104/00065.jpg']
         Raise:
             RuntimeError, if fail to read next image due to wrong index or wrong sFilepath.
         '''
@@ -271,18 +271,18 @@ class Read_Valid_Images(object):
 
     def get_filename(self, index):
         # The 4th element of
-        # [1, 7, 54, "jump", "jump_03-02-12-34-01-795/00240.jpg"]
+        # [1, 2, 2, 'STANDING', 'STANDING_01-17-16-39-13-104/00065.jpg']
         # See "get_training_imgs_info" for the data format
         return self._images_info[index-1][4]
 
     def get_action_label(self, index):
         # The 3rd element of
-        # [1, 7, 54, "jump", "jump_03-02-12-34-01-795/00240.jpg"]
+        # [1, 2, 2, 'STANDING', 'STANDING_01-17-16-39-13-104/00065.jpg']
         # See "get_training_imgs_info" for the data format
         return self._images_info[index-1][3]
 
     def get_image_info(self, index):
-        # Something like [1, 7, 54, "jump", "jump_03-02-12-34-01-795/00240.jpg"]
+        # Something like [1, 2, 2, 'STANDING', 'STANDING_01-17-16-39-13-104/00065.jpg']
         
         return self._images_info[index-1]
 ''' Test the functions in this module '''

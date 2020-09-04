@@ -44,14 +44,12 @@ with open(ROOT + 'config/config.json') as json_config_file:
 class Data_Generator(object):
 
 
-    def __init__(self, data_path, batch_size=64, frames=10, iJoints=35, iDimenssion=2):
+    def __init__(self, data_path, batch_size):
 
         self._data_path = data_path
-        self._frames = frames
+        
         self._batch_size = batch_size
-        self._ijoints = iJoints
-        self._iDimenssion = iDimenssion
-    
+
     def get_train_data_sum(self):
         '''Read how many "skeleton images" is in this dataset
         Return:
@@ -258,29 +256,3 @@ if __name__ == '__main__':
                      FEATURES_POSITION_TRAIN = a, FEATURES_VELOCITY_TRAIN = b, FEATURES_LABELS_TRAIN = c,
                        FEATURES_POSITION_TEST = aa, FEATURES_VELOCITY_TEST = bb, FEATURES_LABELS_TREST = cc)
 
-    # fp_1, fv_1, label_1 =  load_data("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_1.npz")
-    # print(len(fp_1))
-'''
-    data_gen =  Data_Generator("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_2.npz")
-    train_data_sum = data_gen.get_data_sum()
-    print(train_data_sum)
-    train_data_cursors = data_gen.batch_cursors(train_data_sum)
-    index_num = len(train_data_cursors)
-    print(index_num)
-    train_data_index = np.arange(0, train_data_sum-1)
-    time_start=time.time()
-
-    data_gen.get_single_data(100)
-    time_end=time.time()
-
-    print('time cost',time_end-time_start,'s')
-    print("Finish")
-'''
-__author__ = '{author}'
-__copyright__ = 'Copyright {year}, {project_name}'
-__credits__ = ['{credit_list}']
-__license__ = '{license}'
-__version__ = '{mayor}.{minor}.{rel}'
-__maintainer__ = '{maintainer}'
-__email__ = '{contact_email}'
-__status__ = '{dev_status}'
