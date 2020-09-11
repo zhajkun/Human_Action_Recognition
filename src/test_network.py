@@ -81,8 +81,9 @@ with open(ROOT + 'config/config.json') as json_config_file:
     MODEL_PATH = par(config['input']['MODEL_PATH'])
     # output
 
-TEST_FOLDER = 'data/Data_Images_10FPS/WALKING_01-17-16-44-50-670/'
+TEST_FOLDER = 'data_test/UNDEFINED_09-01-13-52-09-823/'
 RESULT_LIST = 'home/zhaj/tf_test/Human_Action_Recognition/data_proc/results.txt'
+VIDEO_PATH = 'data_test/exercise.avi'
 
 def argument_parser():
     '''
@@ -124,6 +125,9 @@ def select_data_source(data_source, data_path):
             10, webcam_idx)
     return images_loader
 
+def devide_scale():
+    pass
+
 def main_function():
 
     # initialize the frames counter at -1, so the first incomming frames is 0
@@ -141,10 +145,11 @@ def main_function():
 
     # select the data source
     #
-    images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
+    #
+    # images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
     # images_loader = select_data_source(data_source_type, data_path)
-    # images_loader = uti_images_io.Read_Images_From_Folder(TEST_FOLDER)
-    
+    images_loader = uti_images_io.Read_Images_From_Folder(TEST_FOLDER)
+    # images_loader = uti_images_io.Read_Images_From_Video(VIDEO_PATH)
     # initialize the skeleton detector   
     Images_Displayer = uti_images_io.Image_Displayer()
     
@@ -161,12 +166,13 @@ def main_function():
     prev_skeletons = []
 
     invalid_skeletons_counter = 0
+    ##################################################################################################
 
     while images_loader.Image_Captured():
      
         # iterate the frames counter by 1
         iFrames_Counter += 1
-
+  
         # grab frames from data source
         images_src = images_loader.Read_Image()
 
@@ -179,6 +185,8 @@ def main_function():
         # delete invalid skeletons from lists
         skeletons_lists = uti_tracker.delete_invalid_skeletons_from_lists(skeletons_lists_src)
 
+        skeletons_lists = uti_features_extraction.rebuild_skeleton_joint_order(skeletons_lists)
+
         if not skeletons_lists and not Featurs_Generator._skeletons_deque:
             
             images_display = images_src.copy()
@@ -187,12 +195,15 @@ def main_function():
             
             prediction_history.insert(iFrames_Counter, [0]*5)
 
+            Featurs_Generator._reset()
+
             continue
         # if Features_generator starts to store skeletons for features, but there were some frames failed, 
         # use the previous skeletons for 
+   
         elif not skeletons_lists and Featurs_Generator._skeletons_deque and prev_skeletons:
             
-            if invalid_skeletons_counter <=5:
+            if invalid_skeletons_counter <= 4:
                 # use previous list
                 skeletons_lists = prev_skeletons
                 
@@ -200,8 +211,11 @@ def main_function():
                 invalid_skeletons_counter += 1
 
             else:
+                
                 Featurs_Generator._reset()
+                
                 invalid_skeletons_counter = 0
+                
                 prev_skeletons = []
 
                 images_display = images_src.copy()
@@ -270,7 +284,6 @@ def main_function():
 
             images_display = uti_images_io.draw_bounding_box_for_one_person_on_image(images_display, skeleton_src)
 
-    
             Images_Displayer.display(images_display)
 
         predict_scores_0.append(prediction_history[iFrames_Counter])
@@ -283,3 +296,4 @@ def main_function():
 
 if __name__ == '__main__':
     main_function()
+ 

@@ -133,7 +133,6 @@ class Data_Generator(object):
         labels = label[data_index]
         return datasets_position, datasets_velocity, labels
 
-
     def generate_batch_data_v1(self, train_data_index, single_batch_cursors, s_p, s_v, label):
         batch_data = []
         batch_labels = []
@@ -186,7 +185,6 @@ class Data_Generator(object):
         return test_batch_data, test_batch_diff_data, test_batch_labels_bi
 
 
-
 def load_data(data_path):
     with np.load(data_path) as data:
         datasets_position = data['FEATURES_POSITION']
@@ -202,22 +200,6 @@ def main_temp():
     test_labels, train_labels = labels[test_idx], labels[training_idx]
     test_vol, train_vol = datasets_velocity[test_idx,:], datasets_velocity[training_idx]
 
-def reshape_single_dataset(self, datasets_position_src, datasets_velocity_src, label_src):
-    datasets_position_dir = []
-    datasets_velocity_dir = []
-    label_dir = []
-    zero_metric = np.zeros([1,self._ijoints, self._iDimenssion], dtype=float)
-    joints_length = self._ijoints * self._iDimenssion * self._frames
-
-    datasets_position_dir = np.reshape(datasets_position_src, (self._frames, self._ijoints, self._iDimenssion))
-    # datasets_position_dir = np.expand_dims(datasets_position_dir, axis=0)
-
-    datasets_velocity_dir = np.reshape(datasets_velocity_src, (self._frames-1, self._ijoints, self._iDimenssion))
-    datasets_velocity_dir = np.append(datasets_velocity_dir, zero_metric, axis=0)
-    # datasets_velocity_dir = np.expand_dims(datasets_velocity_dir, axis=0)
-    label_dir = label_src
-    return datasets_position_dir, datasets_velocity_dir, label_dir
-
 def pack_reshaped_data(self):
     datasets_position_dir = []
     datasets_velocity_dir = []
@@ -231,28 +213,4 @@ def pack_reshaped_data(self):
     return datasets_position_dir, datasets_velocity_dir, label_dir
 
 if __name__ == '__main__':
-     
-    # namelist = data.get_data_name()
-    # output=data.get_cursors(namelist[0])
-    # outputdata, diffoutput, label=data.get_single_data(namelist[0], output, 0)
-    # print(outputdata)
-    # print(diffoutput)
-    # print(label)
-    a, b, c = data.pack_reshaped_data()
-
-    indices = np.random.permutation(a.shape[0])
-    valid_cnt = int(a.shape[0] * 0.3)
-    test_idx,training_idx=indices[:valid_cnt],indices[valid_cnt:]
-    test, train = datasets_position[test_idx,:], datasets_position[training_idx,:]
-    test_labels, train_labels = labels[test_idx], labels[training_idx]
-    test_vol, train_vol = datasets_velocity[test_idx,:], datasets_velocity[training_idx]
-
-    
-    
-    
-    
-    
-    np.savez("C:/Users/Kun/tf_test/Human_Action_Recognition/data_proc/Data_Features/features_2.npz",
-                     FEATURES_POSITION_TRAIN = a, FEATURES_VELOCITY_TRAIN = b, FEATURES_LABELS_TRAIN = c,
-                       FEATURES_POSITION_TEST = aa, FEATURES_VELOCITY_TEST = bb, FEATURES_LABELS_TREST = cc)
-
+    pass

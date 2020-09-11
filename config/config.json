@@ -38,7 +38,7 @@
 
   "BATCH_SIZE": 32,
 
-  "EPOCHS": 100,
+  "EPOCHS": 200,
 
   "Images_Recorder.py": 
   {
@@ -48,7 +48,7 @@
     },
     "output": 
     {
-      "RECORDED_IMAGES_FOLDER": "data/Data_Images_10FPS/"
+      "RECORDED_IMAGES_FOLDER": "data_test/"
     }
   },
 
@@ -88,8 +88,8 @@
     },
     "output":
     {
-      "FEATURES_TRAIN": "data_proc/Data_Features/features_train.npz",
-      "FEATURES_TEST": "data_proc/Data_Features/features_test.npz"    
+      "FEATURES_TRAIN": "data_proc/Data_Features/features_train_no_head.npz",
+      "FEATURES_TEST": "data_proc/Data_Features/features_test_no_head.npz"    
     }
   },
 
@@ -102,7 +102,7 @@
     },
     "output":
     {
-      "MODEL_PATH": "model/two_stream.h5"
+      "MODEL_PATH": "model/two_stream_2s_with_head.h5"
     }
 
   },
@@ -111,7 +111,7 @@
   {
     "input":
     {
-      "MODEL_PATH": "model/two_stream.h5"
+      "MODEL_PATH": "model/two_stream_2s_with_head.h5"
     },
     "output":
     {

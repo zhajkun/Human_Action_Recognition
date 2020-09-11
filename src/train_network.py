@@ -60,7 +60,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
     JOINTS_NUMBER = config_all['JOINTS_NUMBER']
     CHANELS = config_all['CHANELS']
     BATCH_SIZE = config_all['BATCH_SIZE']
-    EPOCHS = 240
+    EPOCHS = config_all['EPOCHS']
 
     # input
 

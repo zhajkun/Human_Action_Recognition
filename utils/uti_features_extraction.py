@@ -547,6 +547,84 @@ class Features_Generator(object):
         velocity.append(zeros_end)
         return np.array(velocity)
 
+
+class Features_Generator_Multi(object):
+    
+    def __init__(self, FEATURE_WINDOW_SIZE):
+        '''
+        Arguments:
+            feature_window_size {int}: Number of adjacent frames for extracting features, defined in config/config.json 
+        '''
+        self._window_size = FEATURE_WINDOW_SIZE
+        self._reset()
+        self._prev_humans_ids = []
+
+    def _reset(self):
+        ''' Reset the Feature_Generator '''
+        self._skeletons_deque_0 = deque()
+        self._skeletons_deque_1 = deque()
+        self._skeletons_deque_2 = deque()
+        self._skeletons_deque_3 = deque()
+        self._skeletons_deque_4 = deque()
+        # self._velocity_deque = deque()
+        self._skeletons_prev = None
+
+    def calculate_features(self, skeletons_src, human_ids):
+        ''' Input a new skeleton, return the extracted feature.
+        Arguments:
+            skeletons_src {lists}: The input new skeletons
+            human_ids {list}: The sorted and tracked humans ID
+        Returns:
+            bSuccess {bool}: Return the feature only when
+                the historical input skeletons are more than self._window_size.
+            features {np.array} 
+        '''
+        if not _prev_humans_ids and human_ids and skeletons_src:
+
+            skeletons = np.array(skeletons_src)
+            
+            # Push to deque
+            self._skeletons_deque_0.append(skeleton[0])
+            self._skeletons_deque_1.append(skeleton[1])
+            self._skeletons_deque_2.append(skeleton[2])
+            self._skeletons_deque_3.append(skeleton[3])
+            self._skeletons_deque_4.append(skeleton[4])
+
+        # self._skeletons_prev = skeleton.copy()
+
+        # -- Extract features
+        # check the deque first, if length of deque equals the FEATURE_WINDOW_SIZE, then calculate, if not, pass by
+        if len(self._skeletons_deque) < self._window_size:
+            return False, None, None
+        elif len(self._skeletons_deque) == self._window_size:
+            # -- Get features of position and velocity
+            position_buff = self._skeletons_deque   
+            position = np.array(position_buff)
+            velocity = self._calculate_velocity_in_deque(
+                position, step=1)  # add one 0 line in this function or else where?
+            # -- Output
+            self._maintain_deque_size()
+            position = np.reshape(position, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+            velocity = np.reshape(velocity, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+            return True, position.copy(), velocity.copy()
+        else:
+            self._reset()
+            return False, None, None
+    def _maintain_deque_size(self):
+
+        self._skeletons_deque.popleft()
+            # self._velocity_deque.popleft()
+ 
+    def _calculate_velocity_in_deque(self, positions, step):
+        velocity = []
+        zeros_end = [0] * (JOINTS_NUMBER * CHANELS)
+        for i in range(0, len(positions) - 1, step):
+            dxdy = positions[i+step][:] - positions[i][:]
+            velocity += dxdy.tolist()
+        velocity.append(zeros_end)
+        return np.array(velocity)
+
+
 if __name__ == '__main__':
     pass
 
