@@ -70,6 +70,9 @@ with open(ROOT + 'config/config.json') as json_config_file:
     # output
     
     MODEL_PATH = par(config['output']['MODEL_PATH'])
+    TXT_FILE_PATH = config['output']['TXT_FILE_PATH']
+    FIGURE_PATH = config['output']['FIGURE_PATH']
+
 input_shape = (FEATURE_WINDOW_SIZE, JOINTS_NUMBER, CHANELS)
 use_bias = True
 
@@ -89,6 +92,7 @@ def load_test_datasets(feature_path):
     return test_position, test_velocity, test_labels
 
 def shared_stream(x_shape):
+
     x = tf.keras.Input(shape=x_shape)
 
     conv1 = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), padding='valid',
@@ -96,20 +100,27 @@ def shared_stream(x_shape):
         
     conv1_1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv1)
-    # conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
+
+    conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
 
     conv2 = tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv1_1)
+    
     conv2 = tf.keras.layers.Activation('relu')(conv2)
-    # conv2 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv2)
+    
+    conv2 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv2)
 
-    conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='valid',
-                   use_bias=use_bias)(conv2)
-    conv3 = tf.keras.layers.Activation('relu')(conv3)
+    # conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='valid',
+    #                 use_bias=use_bias)(conv2)
+    
+    # conv3 = tf.keras.layers.Activation('relu')(conv2)
+    
     # conv3 = tf.keras.layers.Dropout(0.5)(conv3)
+    
     # conv3 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv3)
 
-    shared_layers = tf.keras.Model(x, conv3)
+    shared_layers = tf.keras.Model(x, conv2)
+
     return shared_layers
 
 def model():
@@ -125,6 +136,15 @@ def model():
     up_feature_1 = up_stream(up_1)
     down_feature_0 = down_stream(down_0)
     down_feature_1 = down_stream(down_1)
+
+    # ###only for 1 frame use
+    # up_feature_0 = up_0
+    # up_feature_1 = up_1
+    # down_feature_0 = down_0
+    # down_feature_1 = down_1
+
+
+
 
     up_feature_0 = tf.keras.layers.Flatten()(up_feature_0)
     up_feature_1 = tf.keras.layers.Flatten()(up_feature_1)
@@ -157,7 +177,7 @@ def train_model_on_batch_v1(network):
 
     # network.load_weights(weight_path)
 
-    # plot_model(network, to_file=graph_path)
+    # tf.keras.utils.plot_model(network, to_file= FIGURE_PATH + 'Model.png')
 
     batch_num = 0
     model_save_acc = 0
@@ -213,7 +233,7 @@ def train_model_on_batch_v1(network):
 
 
 
-        if epoch >= 100:
+        if epoch >= 1:
             tst_accuracy_list = []
             tst_loss_list = []
             for num in range(test_index_num):
@@ -235,10 +255,10 @@ def train_model_on_batch_v1(network):
                 model_save_acc = tst_accuracy
                 print('Model Saved')
 
-    uti_commons.save_listlist('training_infos/all_train_loss.txt', all_train_loss)
-    uti_commons.save_listlist('training_infos/all_train_acc.txt', all_train_accuracy)
-    uti_commons.save_listlist('training_infos/all_test_loss.txt', all_tst_loss)
-    uti_commons.save_listlist('training_infos/all_test_acc.txt', all_tst_accuracy)
+    uti_commons.save_listlist(TXT_FILE_PATH + 'all_train_loss.txt', all_train_loss)
+    uti_commons.save_listlist(TXT_FILE_PATH + 'all_train_acc.txt', all_train_accuracy)
+    uti_commons.save_listlist(TXT_FILE_PATH + 'all_test_loss.txt', all_tst_loss)
+    uti_commons.save_listlist(TXT_FILE_PATH + 'all_test_acc.txt', all_tst_accuracy)
     
     fig, axes = plt.subplots(2, sharex=True, figsize=(12, 8))
     fig.suptitle('Training Metrics')
@@ -249,7 +269,18 @@ def train_model_on_batch_v1(network):
     axes[1].set_ylabel('Accuracy', fontsize=14)
     axes[1].set_xlabel('Epoch', fontsize=14)
     axes[1].plot(all_train_accuracy)
-    plt.savefig('training_infos/2s_head.png')
+    plt.savefig(FIGURE_PATH + '10frame_train.png')
+
+    fig, axes = plt.subplots(2, sharex=True, figsize=(12, 8))
+    fig.suptitle('Test Metrics')
+
+    axes[0].set_ylabel('Loss', fontsize=14)
+    axes[0].plot(all_tst_loss)
+
+    axes[1].set_ylabel('Accuracy', fontsize=14)
+    axes[1].set_xlabel('Epoch', fontsize=14)
+    axes[1].plot(all_tst_accuracy)
+    plt.savefig(FIGURE_PATH + '10frame_test.png')
 
 def train_model(network):
     pass

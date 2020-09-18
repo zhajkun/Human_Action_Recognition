@@ -164,7 +164,7 @@ class Skeleton_Detector(object):
             cv2.putText(img_disp,
                         "fps = {:.1f}".format( (1.0 / (time.time() - self._prev_t) )),
                         (10, 30),  cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (0, 216, 119), 2)
+                        (0, 255, 0), 2)
         self._prev_t = time.time()
 
     def humans_to_skeletons_list(self, humans, scale_h = None): 

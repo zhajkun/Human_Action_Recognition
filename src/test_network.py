@@ -228,7 +228,7 @@ def main_function():
 
         prev_skeletons = skeletons_lists
         
-        success, features_x, features_xs = Featurs_Generator.calculate_features(skeletons_lists)
+        success, features_x, features_xs = Featurs_Generator.calculate_features(skeletons_lists[0])
         
         prediction_history.insert(iFrames_Counter, [0]*5)
         
@@ -248,6 +248,8 @@ def main_function():
             down_1 = velocity_temp
         
             prediction = Nerwork.predict([up_0, up_1, down_0, down_1])
+
+
 
             images_display = images_src.copy()
 

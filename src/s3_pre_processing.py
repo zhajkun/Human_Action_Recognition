@@ -98,19 +98,18 @@ def extract_features(
     labels_temp = []
     iClipsCounter = len(clip_number)
     debuger_list = []
+    prev_clip = 0
     # Loop through all data
-    for i, _ in enumerate(clip_number):
+    for i, clip in enumerate(clip_number):
 
         # If a new video clip starts, reset the feature generator
-        if i == 0 or clip_number[i] != clip_number[i-1]:
+        if i == 0 or clip != prev_clip:
             Features_Generator = uti_features_extraction.Features_Generator(window_size)
         
         # Get features
-        skeletons_rebuild = uti_features_extraction.rebuild_skeleton_joint_order_no_head_by_training(skeletons[i, :])
+        skeletons_rebuild = uti_features_extraction.rebuild_skeleton_joint_order_by_training(skeletons[i, :])
 
-        skeletons_rebuild_lists = []
-
-        skeletons_rebuild_lists.insert(0, skeletons_rebuild)
+        skeletons_rebuild_lists = np.array(skeletons_rebuild)
 
         success, features_x, features_xs = Features_Generator.calculate_features(skeletons_rebuild_lists)
 
@@ -118,10 +117,11 @@ def extract_features(
             positions_temp.append(features_x)       
             velocity_temp.append(features_xs)
             labels_temp.append(labels[i])
-
-
         # Print
             print(f'{i+1}/{iClipsCounter}', end=', ')
+
+        prev_clip = clip
+
     positions_temp = np.array(positions_temp)
     velocity_temp = np.array(velocity_temp)
     labels_temp = np.array(labels_temp)

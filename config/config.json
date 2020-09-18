@@ -20,7 +20,7 @@
 
   "OPENPOSE_IMAGE_SIZE": "432x368",
 
-  "FEATURE_WINDOW_SIZE": 20,
+  "FEATURE_WINDOW_SIZE": 15,
 
   "JOINTS_NUMBER": 35,
 
@@ -38,7 +38,7 @@
 
   "BATCH_SIZE": 32,
 
-  "EPOCHS": 200,
+  "EPOCHS": 500,
 
   "Images_Recorder.py": 
   {
@@ -88,8 +88,8 @@
     },
     "output":
     {
-      "FEATURES_TRAIN": "data_proc/Data_Features/features_train_no_head.npz",
-      "FEATURES_TEST": "data_proc/Data_Features/features_test_no_head.npz"    
+      "FEATURES_TRAIN": "data_proc/Data_Features/features_train_fw10.npz",
+      "FEATURES_TEST": "data_proc/Data_Features/features_test_fw10.npz"    
     }
   },
 
@@ -97,12 +97,14 @@
   {
     "input":
     {
-      "FEATURES_TRAIN": "data_proc/Data_Features/features_train.npz",
-      "FEATURES_TEST": "data_proc/Data_Features/features_test.npz"    
+      "FEATURES_TRAIN": "data_proc/Data_Features/features_train_fw15.npz",
+      "FEATURES_TEST": "data_proc/Data_Features/features_test_fw15.npz"    
     },
     "output":
     {
-      "MODEL_PATH": "model/two_stream_2s_with_head.h5"
+      "MODEL_PATH": "model/two_stream_15frame.h5",
+      "TXT_FILE_PATH": "training_infos/15Frame/",
+      "FIGURE_PATH": "Figures/"
     }
 
   },
@@ -111,7 +113,7 @@
   {
     "input":
     {
-      "MODEL_PATH": "model/two_stream_2s_with_head.h5"
+      "MODEL_PATH": "model/two_stream.h5"
     },
     "output":
     {

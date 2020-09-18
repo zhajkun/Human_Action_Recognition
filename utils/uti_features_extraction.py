@@ -107,7 +107,7 @@ def rebuild_skeleton_joint_order(skeletons_src):
     '''
     skeletons_dirs = []
     if not skeletons_src:
-         return []
+         return 
     for skeleton in skeletons_src:
         skeletons_dir = [0]*35*2  # total numer of joints after rebuild (35 joints)
         # if not skeletons_src:
@@ -200,7 +200,7 @@ def rebuild_skeleton_joint_order(skeletons_src):
         skeletons_dir[68] = skeleton[NECK_X]
         skeletons_dir[69] = skeleton[NECK_Y]
         # End of rebuild
-    skeletons_dirs.append(skeletons_dir)
+        skeletons_dirs.append(skeletons_dir)
 
     return skeletons_dirs
 
@@ -505,7 +505,7 @@ class Features_Generator(object):
             features {np.array} 
         '''
         # skeleton = rebuild_skeleton_joint_order_no_head(skeleton_src)
-        # skeleton = rebuild_skeleton_joint_order_by_training(skeleton_src)
+      
 
         # Add the filter here if need, already branched to filter_v1
 
@@ -533,6 +533,7 @@ class Features_Generator(object):
         else:
             self._reset()
             return False, None, None
+    
     def _maintain_deque_size(self):
         if len(self._skeletons_deque) == self._window_size:
             self._skeletons_deque.popleft()
@@ -544,20 +545,24 @@ class Features_Generator(object):
         for i in range(0, len(positions) - 1, step):
             dxdy = positions[i+step][:] - positions[i][:]
             velocity += dxdy.tolist()
-        velocity.append(zeros_end)
+        velocity += zeros_end
         return np.array(velocity)
 
-
-class Features_Generator_Multi(object):
+class Features_Generator_Multiple(Features_Generator):
     
     def __init__(self, FEATURE_WINDOW_SIZE):
         '''
         Arguments:
             feature_window_size {int}: Number of adjacent frames for extracting features, defined in config/config.json 
+            human_id {int}: the tracked id of a human
         '''
         self._window_size = FEATURE_WINDOW_SIZE
+        self._statu_list = [False, False, False, False, False]
+        self._features_list = []
         self._reset()
-        self._prev_humans_ids = []
+    
+    def _resetstatu_list(self):
+        self._statu_list = [False, False, False, False, False]
 
     def _reset(self):
         ''' Reset the Feature_Generator '''
@@ -567,64 +572,251 @@ class Features_Generator_Multi(object):
         self._skeletons_deque_3 = deque()
         self._skeletons_deque_4 = deque()
         # self._velocity_deque = deque()
-        self._skeletons_prev = None
+        self._prev_human_ids = []
 
-    def calculate_features(self, skeletons_src, human_ids):
-        ''' Input a new skeleton, return the extracted feature.
-        Arguments:
-            skeletons_src {lists}: The input new skeletons
-            human_ids {list}: The sorted and tracked humans ID
-        Returns:
-            bSuccess {bool}: Return the feature only when
-                the historical input skeletons are more than self._window_size.
-            features {np.array} 
+    def _check_new_human_ids(self, human_ids):
         '''
-        if not _prev_humans_ids and human_ids and skeletons_src:
+        Use this function to compare the new input human IDs with previous human IDs,
+        and return IDs to delete , which is not in the new list.
+        Arguments:
+            human_ids {list}: represent the tracked ids to humans in view. [0,1,2,3,4]
+        
+        '''
+        index_in_prev_ids = []
+        prev_ids = set(self._prev_human_ids)
+        curr_ids = set(human_ids)
+        humans_to_delete = list(prev_ids - curr_ids)
 
-            skeletons = np.array(skeletons_src)
-            
-            # Push to deque
-            self._skeletons_deque_0.append(skeleton[0])
-            self._skeletons_deque_1.append(skeleton[1])
-            self._skeletons_deque_2.append(skeleton[2])
-            self._skeletons_deque_3.append(skeleton[3])
-            self._skeletons_deque_4.append(skeleton[4])
+        for id in humans_to_delete:
 
-        # self._skeletons_prev = skeleton.copy()
+            id = self._prev_human_ids.index(id)
 
-        # -- Extract features
-        # check the deque first, if length of deque equals the FEATURE_WINDOW_SIZE, then calculate, if not, pass by
-        if len(self._skeletons_deque) < self._window_size:
-            return False, None, None
-        elif len(self._skeletons_deque) == self._window_size:
-            # -- Get features of position and velocity
-            position_buff = self._skeletons_deque   
-            position = np.array(position_buff)
-            velocity = self._calculate_velocity_in_deque(
-                position, step=1)  # add one 0 line in this function or else where?
-            # -- Output
-            self._maintain_deque_size()
-            position = np.reshape(position, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
-            velocity = np.reshape(velocity, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
-            return True, position.copy(), velocity.copy()
+            index_in_prev_ids.append(id) 
+
+        return index_in_prev_ids, humans_to_delete
+
+    def calculate_features_multiple(self, human_ids, skeletons_tracked_lists):
+
+        self._resetstatu_list()
+        index_in_prev_ids, humans_to_delete = self._check_new_human_ids(human_ids)
+        # print(index_in_prev_ids)
+
+        self._prev_human_ids = human_ids
+
+        # check if there are ids to delete, if yes, reset the deque coreponding the index
+        if index_in_prev_ids and humans_to_delete:
+
+            for idx in index_in_prev_ids:
+                if 0 == idx:
+                    self._skeletons_deque_0 = deque()
+                elif 1 == idx:
+                    self._skeletons_deque_1 = deque()
+                elif 2 == idx:
+                    self._skeletons_deque_2 = deque()
+                elif 3 == idx:
+                    self._skeletons_deque_3 = deque()
+                elif 4 == idx:
+                    self._skeletons_deque_4 = deque()
+        
+        # push new skeletons into deque
+        if human_ids:
+            # push skeletons into deque 0
+            if 1 <= len(human_ids):
+                skeleton = np.array(skeletons_tracked_lists[0])
+                self._skeletons_deque_0.append(skeleton)
+            # push skeletons into deque 1
+            if 2 <= len(human_ids):
+                skeleton = np.array(skeletons_tracked_lists[1])
+                self._skeletons_deque_1.append(skeleton)
+            # push skeletons into deque 2
+            if 3 <= len(human_ids):
+                skeleton = np.array(skeletons_tracked_lists[2])
+                self._skeletons_deque_2.append(skeleton)
+            # push skeletons into deque 3
+            if 4 <= len(human_ids):
+                skeleton = np.array(skeletons_tracked_lists[3])
+                self._skeletons_deque_3.append(skeleton)
+            # push skeletons into deque 4
+            if 5 <= len(human_ids):
+                skeleton = np.array(skeletons_tracked_lists[4])
+                self._skeletons_deque_4.append(skeleton)
+
+        # if non of those deques are full, return none (shortcut for no valid features in deque)   
+        if (len(self._skeletons_deque_0) < self._window_size and len(self._skeletons_deque_1) < self._window_size and
+                len(self._skeletons_deque_2) < self._window_size and len(self._skeletons_deque_3) < self._window_size and
+                    len(self._skeletons_deque_4) < self._window_size):
+            return self._statu_list, None, None
         else:
-            self._reset()
-            return False, None, None
-    def _maintain_deque_size(self):
 
-        self._skeletons_deque.popleft()
-            # self._velocity_deque.popleft()
- 
-    def _calculate_velocity_in_deque(self, positions, step):
-        velocity = []
-        zeros_end = [0] * (JOINTS_NUMBER * CHANELS)
-        for i in range(0, len(positions) - 1, step):
-            dxdy = positions[i+step][:] - positions[i][:]
-            velocity += dxdy.tolist()
-        velocity.append(zeros_end)
-        return np.array(velocity)
+            all_pos = np.empty(shape=(5,FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+            all_vel = np.empty(shape=(5,FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+            
+            if len(self._skeletons_deque_0) == self._window_size:
+                position_buff_0 = self._skeletons_deque_0   
+                position_0 = np.array(position_buff_0)
 
+                velocity_0 = self._calculate_velocity_in_deque(position_0, step=1)  # add one 0 line in this function or else where?
+                # -- Output
+            
+                position_0 = np.reshape(position_0, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+                velocity_0 = np.reshape(velocity_0, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+            
+                #pop the first position out of deque
+                self._skeletons_deque_0.popleft()
 
+                self._statu_list[0] = True
+
+                all_pos[0] = position_0
+                all_vel[0] = velocity_0
+            
+            if len(self._skeletons_deque_1) == self._window_size:
+                
+                position_buff_1 = self._skeletons_deque_1   
+                position_1 = np.array(position_buff_1)
+
+                velocity_1 = self._calculate_velocity_in_deque(position_1, step=1)  # add one 0 line in this function or else where?
+                # -- Output
+            
+                position_1 = np.reshape(position_1, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+                velocity_1 = np.reshape(velocity_1, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+            
+                #pop the first position out of deque
+                self._skeletons_deque_1.popleft()
+
+                self._statu_list[1] = True
+
+                all_pos[1] = position_1
+                all_vel[1] = velocity_1
+
+            if len(self._skeletons_deque_2) == self._window_size:
+                
+                position_buff_2 = self._skeletons_deque_2   
+                position_2 = np.array(position_buff_2)
+
+                velocity_2 = self._calculate_velocity_in_deque(position_2, step=1)  # add one 0 line in this function or else where?
+                # -- Output
+            
+                position_2 = np.reshape(position_2, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+                velocity_2 = np.reshape(velocity_2, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+            
+                #pop the first position out of deque
+                self._skeletons_deque_2.popleft()
+
+                self._statu_list[2] = True
+
+                all_pos[2] = position_2
+                all_vel[2] = velocity_2
+
+            if len(self._skeletons_deque_3) == self._window_size:
+                
+                position_buff_3 = self._skeletons_deque_3   
+                position_3 = np.array(position_buff_3)
+
+                velocity_3 = self._calculate_velocity_in_deque(position_3, step=1)  # add one 0 line in this function or else where?
+                # -- Output
+            
+                position_3 = np.reshape(position_3, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+                velocity_3 = np.reshape(velocity_3, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+            
+                #pop the first position out of deque
+                self._skeletons_deque_3.popleft()
+
+                self._statu_list[3] = True
+                                
+                all_pos[3] = position_3
+                all_vel[3] = velocity_3
+
+            if len(self._skeletons_deque_4) == self._window_size:
+                
+                position_buff_4 = self._skeletons_deque_4   
+                position_4 = np.array(position_buff_4)
+
+                velocity_4 = self._calculate_velocity_in_deque(position_4, step=1)  # add one 0 line in this function or else where?
+                # -- Output
+            
+                position_4 = np.reshape(position_4, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+                velocity_4 = np.reshape(velocity_4, (FEATURE_WINDOW_SIZE,JOINTS_NUMBER,CHANELS))
+            
+                #pop the first position out of deque
+                self._skeletons_deque_4.popleft()
+
+                self._statu_list[4] = True
+
+                all_pos[4] = position_4
+                all_vel[4] = velocity_4
+
+            statu_list = self._statu_list
+            
+            self._resetstatu_list()    
+            
+        return statu_list, all_pos.copy(), all_vel.copy()
 if __name__ == '__main__':
-    pass
+    # ww = Features_Generator(FEATURE_WINDOW_SIZE =20)
+    x = Features_Generator_Multiple(FEATURE_WINDOW_SIZE =5)
 
+    x._reset()
+
+    fake_list = [[0]*70, [0.1]*70, [0.2]*70, [0.3]*70, [0.4]*70]
+    human_ids = [1,2,3,4,5]
+
+
+    fake_list_t1 = [[0]*70, [0.1]*70, [0.5]*70, [0.6]*70, [0.7]*70]
+    human_ids_t1 = [1,2,8,9,10]
+
+    fake_list_t2 = [[0]*70, [0.1]*70, [0.5]*70, [0.6]*70, [0.7]*70]
+    human_ids_t2 = [1,2,8,9,10]
+
+    a,b,c = x.calculate_features_multiple(human_ids, fake_list)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t1, fake_list_t1)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+    
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    a,b,c = x.calculate_features_multiple(human_ids_t2, fake_list_t2)
+
+    print(a)
+
+
+
+    

@@ -317,7 +317,7 @@ class Image_Displayer_with_Infobox(object):
 
 def add_white_region_to_left_of_image(img_disp):
     r, c, d = img_disp.shape
-    blank = 255 + np.zeros((r, int(c/4), d), np.uint8)
+    blank = 255 + np.zeros((r, int(c/3), d), np.uint8)
     img_disp = np.hstack((blank, img_disp))
     return img_disp
 
@@ -342,7 +342,7 @@ def draw_scores_for_one_person_on_image(images, scores):
 
     for i in range(0, len(ACTION_CLASSES)):
 
-        FONT_SIZE = 0.7
+        FONT_SIZE = 0.3
         TXT_X = 20
         TXT_Y = 150 + i*30
         COLOR_INTENSITY = 255
@@ -354,7 +354,7 @@ def draw_scores_for_one_person_on_image(images, scores):
 
         cv2.putText(images, text=s, org=(TXT_X, TXT_Y),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=FONT_SIZE,
-                    color=(0, int(COLOR_INTENSITY), 0), thickness=2)
+                    color=(0, int(COLOR_INTENSITY), 0), thickness=1)
 
 def draw_bounding_box_for_one_person_on_image(image_src, skeleton_src):
     '''
@@ -384,16 +384,136 @@ def draw_bounding_box_for_one_person_on_image(image_src, skeleton_src):
     img_display = cv2.rectangle(
         image_src, (minx, miny), (maxx, maxy), (0, 255, 0), 4)
 
-    # Draw text at left corner
-    box_scale = max(
-        0.5, min(2.0, (1.0*(maxx - minx)/image_src.shape[1] / (0.3))**(0.5)))
-    fontsize = 1.4 * box_scale
-    linewidth = int(math.ceil(3 * box_scale))
+    # # Draw text at left corner
+    # box_scale = max(
+    #     0.5, min(2.0, (1.0*(maxx - minx)/image_src.shape[1] / (0.3))**(0.5)))
+    # fontsize = 1.4 * box_scale
+    # linewidth = int(math.ceil(3 * box_scale))
 
-    TEST_COL = int(minx + 5 * box_scale)
-    TEST_ROW = int(miny - 10 * box_scale)
+    # TEST_COL = int(minx + 5 * box_scale)
+    # TEST_ROW = int(miny - 10 * box_scale)
+
     return img_display
+
+def draw_bounding_box_for_multiple_person_on_image(image_src, skeleton_src, scale_h):
+    '''
+    '''
+    if not skeleton_src:
+        return 
+
+    for skeleton in skeleton_src:
+
+        skeleton[1::2] = np.divide(skeleton[1::2], scale_h)
+        minx = 999
+        miny = 999
+        maxx = -999
+        maxy = -999
+        i = 0
+        NaN = 0
+
+        while i < len(skeleton):
+            if not(skeleton[i] == NaN or skeleton[i+1] == NaN):
+                minx = min(minx, skeleton[i])
+                maxx = max(maxx, skeleton[i])
+                miny = min(miny, skeleton[i+1])
+                maxy = max(maxy, skeleton[i+1])
+            i += 2
+
+        minx = int(minx * image_src.shape[1])
+        miny = int(miny * image_src.shape[0])
+        maxx = int(maxx * image_src.shape[1])
+        maxy = int(maxy * image_src.shape[0])
+
+        # Draw bounding box
+        # drawBoxToImage(img_display, [minx, miny], [maxx, maxy])
+        img_display = cv2.rectangle(
+            image_src, (minx, miny), (maxx, maxy), (0, 255, 0), 1)
+
+        # Draw text at left corner
+        box_scale = max(
+            0.5, min(2.0, (1.0*(maxx - minx)/image_src.shape[1] / (0.3))**(0.5)))
+        fontsize = 1.4 * box_scale
+        linewidth = int(math.ceil(3 * box_scale))
+
+        TEST_COL = int(minx + 5 * box_scale)
+        TEST_ROW = int(miny - 10 * box_scale)
+ 
+def draw_result_images(image_src, human_ids, skeleton_src, result_dict, scale_h, ACTION_CLASSES):
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    if not skeleton_src:
+        return
+
+    if len(result_dict) >= 1:
+        humans_with_score, scores = map(list, zip(*result_dict.items()))
+
+    # draw all skeletons in view
+    for idx, skeleton in enumerate(skeleton_src):
+        ''' Attention: this variable idx here, is the index of a skeleton in the 
+        list of skeletons, it has to be matched with human_ids later (sorted human id) 
+       
+        '''
+        # convert y- axis back    
+        skeleton[1::2] = np.divide(skeleton[1::2], scale_h)
+        minx = 999
+        miny = 999
+        maxx = -999
+        maxy = -999
+        i = 0
+        NaN = 0
+
+        while i < len(skeleton):
+            if not(skeleton[i] == NaN or skeleton[i+1] == NaN):
+                minx = min(minx, skeleton[i])
+                maxx = max(maxx, skeleton[i])
+                miny = min(miny, skeleton[i+1])
+                maxy = max(maxy, skeleton[i+1])
+            i += 2
+
+        minx = int(minx * image_src.shape[1])
+        miny = int(miny * image_src.shape[0])
+        maxx = int(maxx * image_src.shape[1])
+        maxy = int(maxy * image_src.shape[0])
+
+        # get the real human id from list[int] human_ids    
+        id_in_view = human_ids[idx]
+
+        # Draw bounding box
+        # drawBoxToImage(img_display, [minx, miny], [maxx, maxy])
+        img_display = cv2.rectangle(
+            image_src, (minx, miny), (maxx, maxy), (0, 255, 0), 2)
+
+        # Draw text at left corner
+        box_scale = max(
+            0.5, min(2.0, (1.0*(maxx - minx)/image_src.shape[1] / (0.3))**(0.5)))
+        fontsize = 1.2 * box_scale
+
+        linewidth = int(math.ceil(2 * box_scale))
+
+        TEST_COL = int(minx + 5 * box_scale)
+        TEST_ROW = int(miny - 10 * box_scale)
+
+        # check if action has been predicted for this human
+        if id_in_view in result_dict:
+            prediction_matix = result_dict.get(id_in_view)
+            sAction_label = convert_label_int_to_str(prediction_matix, ACTION_CLASSES)
+        else: 
+            sAction_label = ''
+
+        img_display = cv2.putText(
+            img_display, "P"+str(id_in_view)+": "+ sAction_label, (TEST_COL, TEST_ROW), font, fontsize, (255, 0, 0), linewidth, cv2.LINE_AA)
+
+def convert_label_int_to_str(prediction_matix, ACTION_CLASSES):
+
+    high_score = max(prediction_matix)
     
+    idx = [i for i, j in enumerate(prediction_matix) if j == high_score]
+    
+    str_label = str(ACTION_CLASSES[idx][0])
+    
+    return str_label
+
 def draw_confusion_matrxi_for_training():
     pass
 # local test function

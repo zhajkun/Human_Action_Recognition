@@ -17,3 +17,4 @@ utils\__pycache__/*
 *.pth
 *.zip
 *.h5
+*.pdf
