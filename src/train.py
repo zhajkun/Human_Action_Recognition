@@ -5,6 +5,7 @@ import time
 import pickle
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import cv2
 # from tensorflow.keras.layers import Conv2D
 
 if True:  # Include project path
@@ -14,39 +15,12 @@ if True:  # Include project path
     CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
     sys.path.append(ROOT)
 
-    # import utils.lib_plot as lib_plot
-    # from utils.lib_classifier import ClassifierOfflineTrain
-
-
+    import utils.uti_images_io as uti_images_io
 
 def par(path):  # Pre-Append ROOT to the path if it's not absolute
     return ROOT + path if (path and path[0] != "/") else path
 
 # -- Settings
-
-with open(ROOT + 'config/config.json') as json_config_file:
-    config_all = json.load(json_config_file)
-    config = config_all["train.py"]
-
-    # common settings
-
-    CLASSES = np.array(config_all["classes"])
-    IMAGE_FILE_NAME_FORMAT = config_all["IMAGE_FILE_NAME_FORMAT"]
-    SKELETON_FILE_NAME_FORMAT = config_all["SKELETON_FILE_NAME_FORMAT"]
-    IMAGES_INFO_INDEX = config_all["IMAGES_INFO_INDEX"]
-
-        # openpose
-
-
-
-    # input
-    FEATURES_SRC = par(config["input"]["FEATURES"])
-    # output
-    
-    MODEL_PATH = par(config["output"]["MODEL_PATH"])
-
-BATCH_SIZE = 64
-SHUFFLE_BUFFER_SIZE = 100
 
 # -- Function
 def load_datasets():    
@@ -115,15 +89,18 @@ def main():
 
     print('\nTest accuracy:', test_acc)
 
+def main_functions():
+    img_loader = uti_images_io.Read_Images_From_Webcam(10,0)
+    img_displayer = uti_images_io.Image_Displayer()
+
+    while img_loader.Image_Captured:
+        img_src = img_loader.Read_Image()
+        img_dst = img_src.copy()
+        img_displayer.display(img_dst)
+
+        if cv2.waitKey(1000) & 0xFF == ord('q'):
+            break
+    img_loader.Stop()
+
 if __name__ == "__main__":
-    datasets_position, datasets_velocity, labels = load_datasets()
-    # print(datasets_velocity[1])
-    print(datasets_position[1])
-    # print(labels[1])
-    # check_diff = np.diff(datasets_position, n=1, axis=1)
-    test_reshape_pos = reshape_dataset(datasets_position[1])
-    test_reshape_vel = reshape_dataset(datasets_velocity[1])
-    
-    print(test_reshape_pos.shape)
-    print(test_reshape_vel.shape)
-    print("Finish")
+    main_functions()

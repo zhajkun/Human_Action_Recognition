@@ -20,7 +20,7 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 import tensorflow as tf
-
+import cv2
 import argparse
 
 # […]
@@ -61,6 +61,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
     ACTION_CLASSES = np.array(config_all['ACTION_CLASSES'])
     IMAGE_FILE_NAME_FORMAT = config_all['IMAGE_FILE_NAME_FORMAT']
     SKELETON_FILE_NAME_FORMAT = config_all['SKELETON_FILE_NAME_FORMAT']
+    VIDEO_FILE_NAME_FORMAT = config_all['VIDEO_FILE_NAME_FORMAT']
     IMAGES_INFO_INDEX = config_all['IMAGES_INFO_INDEX']
     FEATURE_WINDOW_SIZE = config_all['FEATURE_WINDOW_SIZE'] 
     JOINTS_NUMBER = config_all['JOINTS_NUMBER']
@@ -73,9 +74,11 @@ with open(ROOT + 'config/config.json') as json_config_file:
     VIDEO_PATH = 'data_test/exercise.avi'
     # output
 
+    TEST_OUTPUTS = par(config['output']['TEST_OUTPUTS'])
+    # TEST_RESULTS_FOLDER = par(config['output']['TEST_RESULTS_FOLDER'])
+    # TEST_IMAGES_FOLDER = par(config['output']['TEST_IMAGES_FOLDER'])
 def devide_scale():
     pass
-
 
 def predict_action_class(human_ids, statu_list, features_p, features_v, network):
     ''' Argument:
@@ -133,8 +136,8 @@ def main_function():
 
     # select the data source
     # images_loader = uti_images_io.Read_Images_From_Video(VIDEO_PATH)
-    # images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
-    images_loader = uti_images_io.Read_Images_From_Folder('data_test/UNDEFINED_09-01-13-52-09-823')
+    images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
+    # images_loader = uti_images_io.Read_Images_From_Folder('data_test/UNDEFINED_09-01-13-52-09-823')
     # initialize the skeleton detector   
     Images_Displayer = uti_images_io.Image_Displayer()
     
@@ -145,16 +148,25 @@ def main_function():
     # initialize Multiperson Tracker
     Local_Tracker = uti_tracker.Tracker()
 
-    #################################################################################################
+    # Recorder = uti_images_io.Video_Writer(TEST_OUTPUTS + 'TEST_'  + uti_commons.get_time() + '/video', 10)
+    Timestample = uti_commons.get_time()
 
+    TEST_RESULTS_FOLDER = TEST_OUTPUTS + 'TEST_'  + Timestample + '/scores/'
+    TEST_SKELETONS_FOLDER = TEST_OUTPUTS + 'TEST_'  + Timestample + '/skeletons/'
+    TEST_IMAGES_FOLDER = TEST_OUTPUTS + 'TEST_'  + Timestample + '/images/'
+
+    if not os.path.exists(TEST_IMAGES_FOLDER):
+        os.makedirs(TEST_IMAGES_FOLDER)
+    #################################################################################################
+    # Will always be ture, if the webcam is pluged in
     while images_loader.Image_Captured():
 
         # iterate the frames counter by 1
         iFrames_Counter += 1
-  
+
         # grab frames from data source
         image_src = images_loader.Read_Image()
-        
+            
         image_display = image_src.copy()
 
         # get detected human(s) from openpose
@@ -166,8 +178,14 @@ def main_function():
         # delete invalid skeletons from lists
         skeletons_lists = uti_tracker.delete_invalid_skeletons_from_lists(skeletons_lists_src)
 
+        sText_Name = SKELETON_FILE_NAME_FORMAT.format(iFrames_Counter)
+
+        sImage_Name  = IMAGE_FILE_NAME_FORMAT.format(iFrames_Counter)
+
+        uti_commons.save_listlist(TEST_SKELETONS_FOLDER + sText_Name, skeletons_lists_src)
+
         skeleton_detector.draw(image_display, humans)
-###########################################################################################################################################
+
         # sort and track humans in frames
         skeletons_dict = Local_Tracker.track(skeletons_lists)
 
@@ -181,25 +199,35 @@ def main_function():
 
             status_list, features_p, features_v = Featurs_Generator.calculate_features_multiple(human_ids, skeletons_tracked_lists)
 
-            result = predict_action_class(human_ids, status_list, features_p, features_v, network)
+            result_dict = predict_action_class(human_ids, status_list, features_p, features_v, network)
 
-            # image_display = uti_images_io.add_white_region_to_left_of_image(image_display)
+            if len(result_dict) > 0:
 
-            if len(result) > 0:
-
-                values_view = result.values()
+                values_view = result_dict.values()
 
                 value_iterator = iter(values_view)
 
                 first_value = next(value_iterator)
+
+                result_str = str(result_dict)
+
+                uti_commons.save_listlist(TEST_RESULTS_FOLDER + sText_Name, result_str)
                 
                 # only draw all the scores of the first prediction on image
                 uti_images_io.draw_scores_for_one_person_on_image(image_display, first_value)
 
-            uti_images_io.draw_result_images(image_display, human_ids, skeletons_tracked_lists, result, scale_h, ACTION_CLASSES)
-        
+            uti_images_io.draw_result_images(image_display, human_ids, skeletons_tracked_lists, result_dict, scale_h, ACTION_CLASSES)
+
+        # cv2.imwrite(TEST_IMAGES_FOLDER + sImage_Name, image_display)
+
         Images_Displayer.display(image_display)
 
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    # Remeber to kill the thread, or yyou can't quit this function properly
+    images_loader.Stop()
+    
+    print('Finished')    
 
 if __name__ == '__main__':
     main_function()

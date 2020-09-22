@@ -1,11 +1,14 @@
-config/*
 data/*
 data_proc/*
 data_temp/*
+data_test/*
 document/*
 Figures/*
 model/*
+model_2s/*
 utils\__pycache__/*
+test_outputs/*
+training_infos/*
 
 *.txt
 *.png

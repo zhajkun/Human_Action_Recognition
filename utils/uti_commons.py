@@ -67,6 +67,16 @@ def read_listlist(sFilepath):
 
     return ll
 
+def save_result_dict(sFile_Path, result_dict, iFrame_Counter):
+    ''' Save the prediction result as text file, 
+    use the frames counter as the name of tetx file.'''
+    if 0 < len(result_dict):
+        human_id, scores = map(list, zip(*result_dict.items()))
+
+        return
+    else:
+        return
+
 # def saveliststofile(sFilepath, ll):
 #     folder_path = os.path.dirname(sFilepath)
 #     os.makedirs(folder_path, exist_ok=True)
@@ -287,9 +297,7 @@ class Read_Valid_Images(object):
         return self._images_info[index-1]
 ''' Test the functions in this module '''
 if __name__ == "__main__":
-    file = 'data/Data_Images_10FPS/valid_images.txt'
-    s = get_training_images_info(file , image_filename_format="{:05d}.jpg")
-    print(s[2])
+    result_dict = {0:[0, 0, 0.2 , 0.7, 0], 0:[0, 0, 0.2 , 0.7, 0], 0:[0, 0, 0.2 , 0.7, 0], 0:[0, 0, 0.2 , 0.7, 0]}
 
 
 

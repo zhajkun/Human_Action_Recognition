@@ -93,33 +93,32 @@ def load_test_datasets(feature_path):
 
 def shared_stream(x_shape):
 
-    x = tf.keras.Input(shape=x_shape)
+    inputs = tf.keras.Input(shape=x_shape)
 
-    conv1 = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), padding='valid',
-                   use_bias=use_bias)(x)
-        
-    conv1_1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='valid',
-                   use_bias=use_bias)(conv1)
+    conv1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='valid',
+                   use_bias=use_bias)(inputs)
 
-    conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
+    # conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
 
     conv2 = tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='valid',
-                   use_bias=use_bias)(conv1_1)
+                   use_bias=use_bias)(conv1)
     
     conv2 = tf.keras.layers.Activation('relu')(conv2)
     
     conv2 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv2)
 
-    # conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='valid',
-    #                 use_bias=use_bias)(conv2)
+    conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='valid',
+                use_bias=use_bias)(conv2)
     
-    # conv3 = tf.keras.layers.Activation('relu')(conv2)
+    conv3 = tf.keras.layers.Activation('relu')(conv3)
     
-    # conv3 = tf.keras.layers.Dropout(0.5)(conv3)
+    conv3 = tf.keras.layers.Dropout(0.5)(conv3)
     
-    # conv3 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv3)
+    conv3 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv3)
 
-    shared_layers = tf.keras.Model(x, conv2)
+    outputs = conv3
+
+    shared_layers = tf.keras.Model(inputs, outputs)
 
     return shared_layers
 
@@ -169,7 +168,7 @@ def model():
 
     network = tf.keras.Model(inputs=[up_0, up_1, down_0, down_1], outputs=fc_5)
     return network
-    
+
 def train_model_on_batch_v1(network):
     adam = tf.keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08) # original setup from paper
     network.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
@@ -242,6 +241,10 @@ def train_model_on_batch_v1(network):
                 tst_up_1, tst_down_1, tst_labels_1 \
                     = test_data.get_test_batch(test_data_index, test_data_cursors[num], test_position, test_velocity, test_labels)
                 tst_loss = network.test_on_batch([tst_up_0, tst_up_1, tst_down_0, tst_down_1], tst_labels_0)
+                
+                # test_result = network.evaluate([tst_up_0, tst_up_1, tst_down_0, tst_down_1], tst_labels_0)
+
+
                 tst_loss_list.append(tst_loss[0])
                 tst_accuracy_list.append(tst_loss[1])
             tst_accuracy = sum(tst_accuracy_list) / len(tst_accuracy_list)
@@ -269,7 +272,7 @@ def train_model_on_batch_v1(network):
     axes[1].set_ylabel('Accuracy', fontsize=14)
     axes[1].set_xlabel('Epoch', fontsize=14)
     axes[1].plot(all_train_accuracy)
-    plt.savefig(FIGURE_PATH + '10frame_train.png')
+    plt.savefig(FIGURE_PATH + '20frame_train.png')
 
     fig, axes = plt.subplots(2, sharex=True, figsize=(12, 8))
     fig.suptitle('Test Metrics')
@@ -280,7 +283,7 @@ def train_model_on_batch_v1(network):
     axes[1].set_ylabel('Accuracy', fontsize=14)
     axes[1].set_xlabel('Epoch', fontsize=14)
     axes[1].plot(all_tst_accuracy)
-    plt.savefig(FIGURE_PATH + '10frame_test.png')
+    plt.savefig(FIGURE_PATH + '20frame_test.png')
 
 def train_model(network):
     pass

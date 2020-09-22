@@ -185,8 +185,7 @@ class Read_Images_From_Webcam(object):
         self._bIs_Stoped = True
 
     def __del__(self):
-        if not self._bIs_Stoped:
-            self.Stop()
+        self.Stop()
 
     def _Thread_Reading_Webcam_Frames(self):
         while self._Is_Thread_Alive.value:
@@ -514,6 +513,10 @@ def convert_label_int_to_str(prediction_matix, ACTION_CLASSES):
     
     return str_label
 
+def save_images(sFile_path, img_src):
+
+    cv2.imwrite(sFile_path, img_src)
+
 def draw_confusion_matrxi_for_training():
     pass
 # local test function
@@ -528,6 +531,7 @@ def test_Read_From_Webcam():
             break
         print(f"Read {i}th image...")
         local_Image_Displayer.display(Image)
+    Webcam_Reader.Stop()  
     print("Program ends")
 
 def test_Read_From_Video():
@@ -548,5 +552,4 @@ def test_Read_From_Video():
 
 if __name__ == "__main__":
     test_Read_From_Webcam()
-    sys.exit(0)
 
