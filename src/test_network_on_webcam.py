@@ -71,7 +71,7 @@ with open(ROOT + 'config/config.json') as json_config_file:
     # input
     MODEL_PATH = par(config['input']['MODEL_PATH'])
 
-    VIDEO_PATH = 'data_test/exercise.avi'
+    VIDEO_PATH = 'data_test/HandstandWalking/v_HandstandWalking_g02_c03.avi'
     # output
 
     TEST_OUTPUTS = par(config['output']['TEST_OUTPUTS'])
@@ -107,11 +107,13 @@ def predict_action_class(human_ids, statu_list, features_p, features_v, network)
             down_0 = velocity_temp
             down_1 = velocity_temp
         
-            prediction_int = network.predict([up_0, up_1, down_0, down_1])
+            prediction_vector = network.predict([up_0, up_1, down_0, down_1])
 
             human_id = human_ids[idx]
 
-            prediction.update({human_id:prediction_int[0]})  
+            prediction_list = prediction_vector[0].tolist()
+
+            prediction.update({human_id:prediction_list})  
             
     return prediction       
 
@@ -135,9 +137,9 @@ def main_function():
     network = tf.keras.models.load_model(MODEL_PATH)
 
     # select the data source
-    # images_loader = uti_images_io.Read_Images_From_Video(VIDEO_PATH)
-    images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
-    # images_loader = uti_images_io.Read_Images_From_Folder('data_test/UNDEFINED_09-01-13-52-09-823')
+    images_loader = uti_images_io.Read_Images_From_Video(VIDEO_PATH)
+    # images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
+    # images_loader = uti_images_io.Read_Images_From_Folder('data_test/TEST')
     # initialize the skeleton detector   
     Images_Displayer = uti_images_io.Image_Displayer()
     
@@ -218,8 +220,7 @@ def main_function():
 
             uti_images_io.draw_result_images(image_display, human_ids, skeletons_tracked_lists, result_dict, scale_h, ACTION_CLASSES)
 
-        # cv2.imwrite(TEST_IMAGES_FOLDER + sImage_Name, image_display)
-
+        cv2.imwrite(TEST_IMAGES_FOLDER + sImage_Name, image_display)
         Images_Displayer.display(image_display)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):

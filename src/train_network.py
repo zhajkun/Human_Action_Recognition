@@ -98,7 +98,7 @@ def shared_stream(x_shape):
     conv1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(inputs)
 
-    # conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
+    conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
 
     conv2 = tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv1)
@@ -110,6 +110,9 @@ def shared_stream(x_shape):
     conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                 use_bias=use_bias)(conv2)
     
+    conv3 = tf.keras.layers.Conv2D(filters=512, kernel_size=(3, 3), strides=(1, 1), padding='valid', 
+                    use_bias=use_bias)(conv3)
+
     conv3 = tf.keras.layers.Activation('relu')(conv3)
     
     conv3 = tf.keras.layers.Dropout(0.5)(conv3)
@@ -136,37 +139,39 @@ def model():
     down_feature_0 = down_stream(down_0)
     down_feature_1 = down_stream(down_1)
 
-    # ###only for 1 frame use
+    ###only for 1 frame use
     # up_feature_0 = up_0
     # up_feature_1 = up_1
     # down_feature_0 = down_0
     # down_feature_1 = down_1
 
-
-
-
+    # Flatten all 4 streams
     up_feature_0 = tf.keras.layers.Flatten()(up_feature_0)
     up_feature_1 = tf.keras.layers.Flatten()(up_feature_1)
     down_feature_0 = tf.keras.layers.Flatten()(down_feature_0)
     down_feature_1 = tf.keras.layers.Flatten()(down_feature_1)
-
+    
+    # only use the maximun features for the next layer
     up_feature = tf.keras.layers.Maximum()([up_feature_0, up_feature_1])
     down_feature = tf.keras.layers.Maximum()([down_feature_0, down_feature_1])
-
+   
+    # concate the features from position and velocity
     feature = tf.keras.layers.concatenate([up_feature, down_feature])
 
     fc_1 = tf.keras.layers.Dense(units=256, activation='relu', use_bias=True, kernel_regularizer=l2(0.001))(feature)
-    # fc_1 = tf.keras.layers.Dropout(0.5)(fc_1)
+    fc_1 = tf.keras.layers.Dropout(0.5)(fc_1)
 
     fc_2 = tf.keras.layers.Dense(units=128, activation='relu', use_bias=True)(fc_1)
 
-    fc_3 = tf.keras.layers.Dense(units=96, activation='relu', use_bias=True)(fc_2)
+    fc_3 = tf.keras.layers.Dense(units=64, activation='relu', use_bias=True)(fc_2)
 
     fc_4 = tf.keras.layers.Dense(units=32, activation='relu', use_bias=True)(fc_3)
 
-    fc_5 = tf.keras.layers.Dense(units=5, activation='softmax', use_bias=True)(fc_4) # units=len(ACTION_CLASSES)
+    fc_5 = tf.keras.layers.Dense(units=16, activation='relu', use_bias=True)(fc_4)
 
-    network = tf.keras.Model(inputs=[up_0, up_1, down_0, down_1], outputs=fc_5)
+    fc_6 = tf.keras.layers.Dense(units=len(ACTION_CLASSES), activation='softmax', use_bias=True)(fc_5) # units=len(ACTION_CLASSES)
+
+    network = tf.keras.Model(inputs=[up_0, up_1, down_0, down_1], outputs=fc_6)
     return network
 
 def train_model_on_batch_v1(network):
@@ -244,7 +249,7 @@ def train_model_on_batch_v1(network):
                 
                 # test_result = network.evaluate([tst_up_0, tst_up_1, tst_down_0, tst_down_1], tst_labels_0)
 
-
+                
                 tst_loss_list.append(tst_loss[0])
                 tst_accuracy_list.append(tst_loss[1])
             tst_accuracy = sum(tst_accuracy_list) / len(tst_accuracy_list)
@@ -272,7 +277,7 @@ def train_model_on_batch_v1(network):
     axes[1].set_ylabel('Accuracy', fontsize=14)
     axes[1].set_xlabel('Epoch', fontsize=14)
     axes[1].plot(all_train_accuracy)
-    plt.savefig(FIGURE_PATH + '20frame_train.png')
+    plt.savefig(FIGURE_PATH + '30frame_v2_c_train.png')
 
     fig, axes = plt.subplots(2, sharex=True, figsize=(12, 8))
     fig.suptitle('Test Metrics')
@@ -283,7 +288,7 @@ def train_model_on_batch_v1(network):
     axes[1].set_ylabel('Accuracy', fontsize=14)
     axes[1].set_xlabel('Epoch', fontsize=14)
     axes[1].plot(all_tst_accuracy)
-    plt.savefig(FIGURE_PATH + '20frame_test.png')
+    plt.savefig(FIGURE_PATH + '30frame_v2_c_test.png')
 
 def train_model(network):
     pass

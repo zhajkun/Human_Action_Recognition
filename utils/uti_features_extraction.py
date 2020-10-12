@@ -536,8 +536,8 @@ class Features_Generator(object):
     
     def _maintain_deque_size(self):
         if len(self._skeletons_deque) == self._window_size:
+            # self._skeletons_deque.clear()
             self._skeletons_deque.popleft()
-            # self._velocity_deque.popleft()
  
     def _calculate_velocity_in_deque(self, positions, step):
         velocity = []
