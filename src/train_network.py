@@ -294,6 +294,7 @@ def train_model(network):
     pass
 
 if __name__ == '__main__':
+    # start to train the network, change the input shape of network via config/config.json
     time_start = time.time()
     network = model()
     train_model_on_batch_v1(network)
