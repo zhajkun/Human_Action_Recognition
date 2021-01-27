@@ -21,3 +21,5 @@ If you want to try other trainde models, rember to change configurations. <br>
 6. At this point. the system should be ready to run. You can use [test_network_on_webcam.py](./src/test_network_on_webcam.py) to test it.
 # Program Structure
 The whole Structure of this repository is showed bellow:<br>
+![GitHub](https://github.com/zhajkun/Human_Action_Recognition/blob/master/document/programm_structur_2.png)<br>
+At first, like mentioned before. Make sure the [config.json](./config/config.json) is adjusted for your PC. Especially check if the file path is right. <br>
