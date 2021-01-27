@@ -23,3 +23,6 @@ If you want to try other trainde models, rember to change configurations. <br>
 The whole Structure of this repository is showed bellow:<br>
 ![GitHub](https://github.com/zhajkun/Human_Action_Recognition/blob/master/document/programm_structur_2.png)<br>
 At first, like mentioned before. Make sure the [config.json](./config/config.json) is adjusted for your PC. Especially check if the file path is right. <br>
+The red blocks are libraries, blue are main scripts and green are data. 
+# How to use
+If you wishe to record your own dataset, start with [Images_Recorder.py](./tools/Images_Recorder.py). Default FPS is 10, change it in [uti_images_io.py](./utils/uti_images_io.py) if you need. 
