@@ -4,7 +4,17 @@
 
 '''
 {
-    first version of two-stream network
+    first version of two-stream network, change the data source if zou neeed, default is webcam.
+    If zou want to run from videos or images from folder, change Images_Loader and specific the data path.
+        
+        
+        
+    Input:
+        MODEL_PATH
+        VIDEO_PATH
+        IMAGE_PATH
+    Output:
+        TEST_OUTPUTS
 }
 {License_info}
 '''
@@ -26,7 +36,7 @@ import argparse
 # […]
 
 # Libs
-from numba import jit
+
 from keras.backend.tensorflow_backend import set_session
 
 config = tf.ConfigProto()
@@ -71,14 +81,17 @@ with open(ROOT + 'config/config.json') as json_config_file:
     # input
     MODEL_PATH = par(config['input']['MODEL_PATH'])
 
-    VIDEO_PATH = 'data_test/exercise.avi'
+    VIDEO_PATH = par(config['input']['VIDEO_PATH']) 
+
+    IMAGE_PATH = par(config['input']['IMAGE_PATH']) 
+
+    # IMAGE_PATH = 'C:/Users/Kun/tf_test/Human_Action_Recognition/data_test/EVA_0/'
+    # VIDEO_PATH = 'C:/Users/Kun/tf_test/Human_Action_Recognition/NTU/S001/'
     # output
 
     TEST_OUTPUTS = par(config['output']['TEST_OUTPUTS'])
     # TEST_RESULTS_FOLDER = par(config['output']['TEST_RESULTS_FOLDER'])
     # TEST_IMAGES_FOLDER = par(config['output']['TEST_IMAGES_FOLDER'])
-def devide_scale():
-    pass
 
 def predict_action_class(human_ids, statu_list, features_p, features_v, network):
     ''' Argument:
@@ -109,6 +122,8 @@ def predict_action_class(human_ids, statu_list, features_p, features_v, network)
         
             prediction_int = network.predict([up_0, up_1, down_0, down_1])
 
+            prediction_int = np.ndarray.tolist(prediction_int)
+            
             human_id = human_ids[idx]
 
             prediction.update({human_id:prediction_int[0]})  
@@ -122,7 +137,6 @@ def convert_actionlabel_from_int_to_string(prediction, ACTION_CLASSES):
     '''
     pass
 
-
 def main_function():
 
     # initialize the frames counter at -1, so the first incomming frames is 0
@@ -135,9 +149,9 @@ def main_function():
     network = tf.keras.models.load_model(MODEL_PATH)
 
     # select the data source
-    # images_loader = uti_images_io.Read_Images_From_Video(VIDEO_PATH)
+    # images_loader = uti_images_io.Read_Images_From_Video(VIDEO_PATH_SRC)
     images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
-    # images_loader = uti_images_io.Read_Images_From_Folder('data_test/UNDEFINED_09-01-13-52-09-823')
+    # images_loader = uti_images_io.Read_Images_From_Folder(IMAGE_PATH)
     # initialize the skeleton detector   
     Images_Displayer = uti_images_io.Image_Displayer()
     
@@ -151,9 +165,9 @@ def main_function():
     # Recorder = uti_images_io.Video_Writer(TEST_OUTPUTS + 'TEST_'  + uti_commons.get_time() + '/video', 10)
     Timestample = uti_commons.get_time()
 
-    TEST_RESULTS_FOLDER = TEST_OUTPUTS + 'TEST_'  + Timestample + '/scores/'
-    TEST_SKELETONS_FOLDER = TEST_OUTPUTS + 'TEST_'  + Timestample + '/skeletons/'
-    TEST_IMAGES_FOLDER = TEST_OUTPUTS + 'TEST_'  + Timestample + '/images/'
+    TEST_RESULTS_FOLDER = TEST_OUTPUTS + 'TEST_Webcam'  + Timestample + '/scores/'
+    TEST_SKELETONS_FOLDER = TEST_OUTPUTS + 'TEST_Webcam'  + Timestample + '/skeletons/'
+    TEST_IMAGES_FOLDER = TEST_OUTPUTS + 'TEST_Webcam'  + Timestample + '/images/'
 
     if not os.path.exists(TEST_IMAGES_FOLDER):
         os.makedirs(TEST_IMAGES_FOLDER)
@@ -209,16 +223,17 @@ def main_function():
 
                 first_value = next(value_iterator)
 
-                result_str = str(result_dict)
+                # result_str = str(result_dict)
 
-                uti_commons.save_listlist(TEST_RESULTS_FOLDER + sText_Name, result_str)
+                # np.savetxt(TEST_RESULTS_FOLDER + sText_Name, result_dict)
+                uti_commons.save_result_dict(TEST_RESULTS_FOLDER + sText_Name, result_dict)
                 
                 # only draw all the scores of the first prediction on image
                 uti_images_io.draw_scores_for_one_person_on_image(image_display, first_value)
 
             uti_images_io.draw_result_images(image_display, human_ids, skeletons_tracked_lists, result_dict, scale_h, ACTION_CLASSES)
 
-        # cv2.imwrite(TEST_IMAGES_FOLDER + sImage_Name, image_display)
+        cv2.imwrite(TEST_IMAGES_FOLDER + sImage_Name, image_display)
 
         Images_Displayer.display(image_display)
 
@@ -230,4 +245,5 @@ def main_function():
     print('Finished')    
 
 if __name__ == '__main__':
+    
     main_function()

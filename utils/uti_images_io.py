@@ -82,7 +82,7 @@ class Read_Images_From_Folder(object):
         None
 
 class Read_Images_From_Video(object):
-    def __init__(self, sVideo_Path, iSample_Interval=1):
+    def __init__(self, sVideo_Path, iSample_Interval=3):
         ''' Read Images from a video in a given folder, call as module.
         Arguments:
             sVideo_Path {string}: the path of the video folder.

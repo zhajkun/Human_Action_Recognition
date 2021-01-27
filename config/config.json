@@ -14,13 +14,13 @@
 
   "VIDEO_FILE_NAME_FORMAT": "{:05d}.avi",
 
-  "TF_OPENPOSE_LOCATION": "/home/zhaj/tf_test/tf-pose-estimation",
+  "TF_OPENPOSE_LOCATION": "C:/Users/Kun/tf_test/tf-pose-estimation",
 
   "OPENPOSE_MODEL": "mobilenet_thin",
 
   "OPENPOSE_IMAGE_SIZE": "432x368",
 
-  "FEATURE_WINDOW_SIZE": 20,
+  "FEATURE_WINDOW_SIZE": 35,
 
   "JOINTS_NUMBER": 35,
 
@@ -38,7 +38,7 @@
 
   "BATCH_SIZE": 32,
 
-  "EPOCHS": 500,
+  "EPOCHS": 200,
 
   "Images_Recorder.py": 
   {
@@ -88,8 +88,8 @@
     },
     "output":
     {
-      "FEATURES_TRAIN": "data_proc/Data_Features/features_train_fw10.npz",
-      "FEATURES_TEST": "data_proc/Data_Features/features_test_fw10.npz"    
+      "FEATURES_TRAIN": "data_proc/Data_Features/features_train_fw35_c.npz",
+      "FEATURES_TEST": "data_proc/Data_Features/features_test_fw35_c.npz"    
     }
   },
 
@@ -97,14 +97,14 @@
   {
     "input":
     {
-      "FEATURES_TRAIN": "data_proc/Data_Features/features_train_fw20.npz",
-      "FEATURES_TEST": "data_proc/Data_Features/features_test_fw20.npz"    
+      "FEATURES_TRAIN": "data_proc/Data_Features/features_train_fw35_c.npz",
+      "FEATURES_TEST": "data_proc/Data_Features/features_test_fw35_c.npz"    
     },
     "output":
     {
-      "MODEL_PATH": "model/two_stream_20frame.h5",
-      "TXT_FILE_PATH": "training_infos/20Frame/",
-      "FIGURE_PATH": "Figures/"
+      "MODEL_PATH": "model/test/two_stream_35frame_adam_cc.h5",
+      "TXT_FILE_PATH": "Human_Action_Recognition/training_infos/35Frame_cc/",
+      "FIGURE_PATH": "Human_Action_Recognition/Figures/Train/"
     }
 
   },
@@ -113,7 +113,9 @@
   {
     "input":
     {
-      "MODEL_PATH": "model/two_stream_20frame.h5"
+      "MODEL_PATH": "model/test/two_stream_20frame_adam_cc.h5", 
+      "IMAGE_PATH": "data_test/EVA_0/",
+      "VIDEO_PATH": "NTU/S001/Waving_023/"
     },
     "output":
     {

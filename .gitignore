@@ -9,6 +9,7 @@ model_2s/*
 utils\__pycache__/*
 test_outputs/*
 training_infos/*
+iRobeka_Actions/*
 
 *.txt
 *.png

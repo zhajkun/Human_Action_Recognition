@@ -38,6 +38,9 @@ import pickle
 import json
 import datetime
 from time import sleep
+from os import listdir
+from os.path import isfile
+from os.path import join
 # […]
 
 # Own modules
@@ -67,15 +70,13 @@ def read_listlist(sFilepath):
 
     return ll
 
-def save_result_dict(sFile_Path, result_dict, iFrame_Counter):
+def save_result_dict(sFile_Path, result_dict):
     ''' Save the prediction result as text file, 
     use the frames counter as the name of tetx file.'''
-    if 0 < len(result_dict):
-        human_id, scores = map(list, zip(*result_dict.items()))
-
-        return
-    else:
-        return
+    folder_path = os.path.dirname(sFile_Path)
+    os.makedirs(folder_path, exist_ok=True)
+    with open(sFile_Path, 'w') as file:
+        file.write(json.dumps(result_dict))
 
 # def saveliststofile(sFilepath, ll):
 #     folder_path = os.path.dirname(sFilepath)
@@ -163,6 +164,20 @@ def get_training_images_info(
 
     return images_info
 
+def read_all_file_names(sFile_Path, bSort_Lists=True):
+    ''' Get all filenames under certain path 
+    Arguments:
+        sFile_Path {str}: the folder path of input files
+    Return:
+        skeletons_dir {list}:
+            The detected skeletons from s1_get_skeletons_data 
+    '''
+    sFile_Names = [f for f in listdir(sFile_Path) if isfile(join(sFile_Path, f))]
+    if bSort_Lists:
+        sFile_Names.sort()
+    
+    sFile_Names = [sFile_Path + '/' + f for f in sFile_Names]
+    return sFile_Names
 
 ##############################################################################################################################
 # 

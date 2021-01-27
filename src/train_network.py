@@ -104,25 +104,29 @@ def shared_stream(x_shape):
                    use_bias=use_bias)(conv1)
     
     conv2 = tf.keras.layers.Activation('relu')(conv2)
-    
+   
     conv2 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv2)
 
     conv3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                 use_bias=use_bias)(conv2)
-    
-    conv3 = tf.keras.layers.Activation('relu')(conv3)
-    
-    conv3 = tf.keras.layers.Dropout(0.5)(conv3)
-    
-    conv3 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv3)
 
-    outputs = conv3
+    conv4 = tf.keras.layers.Conv2D(filters=512, kernel_size=(3, 3), strides=(1, 1), padding='valid',
+                use_bias=use_bias)(conv3)    
+    
+    conv4 = tf.keras.layers.Activation('relu')(conv4)
+
+    conv4 = tf.keras.layers.Dropout(0.5)(conv4)
+    
+    conv4 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv4)
+
+    outputs = conv4
 
     shared_layers = tf.keras.Model(inputs, outputs)
 
     return shared_layers
 
 def model():
+
     up_0 = tf.keras.layers.Input(shape=input_shape, name='up_stream_0')
     up_1 = tf.keras.layers.Input(shape=input_shape, name='up_stream_1')
     down_0 = tf.keras.layers.Input(shape=input_shape, name='down_stream_0')
@@ -136,14 +140,11 @@ def model():
     down_feature_0 = down_stream(down_0)
     down_feature_1 = down_stream(down_1)
 
-    # ###only for 1 frame use
+    ##only for 1 frame use
     # up_feature_0 = up_0
     # up_feature_1 = up_1
     # down_feature_0 = down_0
     # down_feature_1 = down_1
-
-
-
 
     up_feature_0 = tf.keras.layers.Flatten()(up_feature_0)
     up_feature_1 = tf.keras.layers.Flatten()(up_feature_1)
@@ -156,22 +157,33 @@ def model():
     feature = tf.keras.layers.concatenate([up_feature, down_feature])
 
     fc_1 = tf.keras.layers.Dense(units=256, activation='relu', use_bias=True, kernel_regularizer=l2(0.001))(feature)
-    # fc_1 = tf.keras.layers.Dropout(0.5)(fc_1)
+    
+    fc_1 = tf.keras.layers.Dropout(0.5)(fc_1)
 
     fc_2 = tf.keras.layers.Dense(units=128, activation='relu', use_bias=True)(fc_1)
 
-    fc_3 = tf.keras.layers.Dense(units=96, activation='relu', use_bias=True)(fc_2)
+    fc_3 = tf.keras.layers.Dense(units=64, activation='relu', use_bias=True)(fc_2)
 
     fc_4 = tf.keras.layers.Dense(units=32, activation='relu', use_bias=True)(fc_3)
 
-    fc_5 = tf.keras.layers.Dense(units=5, activation='softmax', use_bias=True)(fc_4) # units=len(ACTION_CLASSES)
+    fc_5 = tf.keras.layers.Dense(units=16, activation='relu', use_bias=True)(fc_4)
 
-    network = tf.keras.Model(inputs=[up_0, up_1, down_0, down_1], outputs=fc_5)
+    fc_6 = tf.keras.layers.Dense(units=5, activation='softmax', use_bias=True)(fc_5) # units=len(ACTION_CLASSES)
+
+    network = tf.keras.Model(inputs=[up_0, up_1, down_0, down_1], outputs=fc_6)
     return network
 
 def train_model_on_batch_v1(network):
     adam = tf.keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08) # original setup from paper
+
+    SGD = tf.keras.optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
+
+    RMS = tf.keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=None, decay=0.0)
+
+    # network.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
+    
     network.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+
     network.summary()
 
     # network.load_weights(weight_path)
@@ -272,7 +284,7 @@ def train_model_on_batch_v1(network):
     axes[1].set_ylabel('Accuracy', fontsize=14)
     axes[1].set_xlabel('Epoch', fontsize=14)
     axes[1].plot(all_train_accuracy)
-    plt.savefig(FIGURE_PATH + '20frame_train.png')
+    plt.savefig(FIGURE_PATH + '35frame_train_cc.png')
 
     fig, axes = plt.subplots(2, sharex=True, figsize=(12, 8))
     fig.suptitle('Test Metrics')
@@ -283,10 +295,7 @@ def train_model_on_batch_v1(network):
     axes[1].set_ylabel('Accuracy', fontsize=14)
     axes[1].set_xlabel('Epoch', fontsize=14)
     axes[1].plot(all_tst_accuracy)
-    plt.savefig(FIGURE_PATH + '20frame_test.png')
-
-def train_model(network):
-    pass
+    plt.savefig(FIGURE_PATH + '35frame_test_cc.png')
 
 if __name__ == '__main__':
     time_start = time.time()
