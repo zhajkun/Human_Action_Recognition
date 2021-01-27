@@ -25,4 +25,10 @@ The whole Structure of this repository is showed bellow:<br>
 At first, like mentioned before. Make sure the [config.json](./config/config.json) is adjusted for your PC. Especially check if the file path is right. <br>
 The red blocks are libraries, blue are main scripts and green are data. 
 # How to use
-If you wishe to record your own dataset, start with [Images_Recorder.py](./tools/Images_Recorder.py). Default FPS is 10, change it in [uti_images_io.py](./utils/uti_images_io.py) if you need. 
+# Record own dataset
+If you wish to record your own dataset, start with [Images_Recorder.py](./tools/Images_Recorder.py). Default FPS is 10, change it in [uti_images_io.py](./utils/uti_images_io.py) if you need. 
+# Get skeletons from exisitng dataset
+If you wish to get skeletons from exisitng dataset (videos, images), use [s1_get_skeletons_data.py](./src/s1_get_skeletons_data.py) first.<br>
+Remember change the source file path from [config.json](./config/config.json). <br>
+You will recive all skeletons from images. The possible noise are already filter at this point.<br>
+You can change the thresholds of filter from [uti_tracker.py](./utils/uti_tracker.py)
