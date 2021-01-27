@@ -31,4 +31,7 @@ If you wish to record your own dataset, start with [Images_Recorder.py](./tools/
 If you wish to get skeletons from exisitng dataset (videos, images), use [s1_get_skeletons_data.py](./src/s1_get_skeletons_data.py) first.<br>
 Remember change the source file path from [config.json](./config/config.json). <br>
 You will recive all skeletons from images. The possible noise are already filter at this point.<br>
-You can change the thresholds of filter from [uti_tracker.py](./utils/uti_tracker.py)
+You can change the thresholds of filter from [uti_tracker.py](./utils/uti_tracker.py)<br>
+The outputs of this program are txt files. <br>
+Those txt files will be conert to numpy array and pack together by [s2_pack_all_text_files.py](./src/s2_pack_all_text_files.py).<br>
+Ofcourse you can write your own program to convert it to .csv files.<br>
