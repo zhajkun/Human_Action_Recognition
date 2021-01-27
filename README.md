@@ -5,7 +5,7 @@ E-Mail: zhajkun@gmail.com
 The following code is based on Python 3.6.8, and TensorFlow 1.15. 
 # Installation
 1. Fisrt, you need to intall tf-pose-estimation. This is a OpenPose implemented using Tensorflow.<br>
-https://github.com/ildoonet/tf-pose-estimation
+https://github.com/ildoonet/tf-pose-estimation <br>
 Please rember the location of your local tf-pose-estimation, you need to change this path at [config.json](./config/config.json)
 2. Clone this repository to your local PC.
 3. Run requirements.txt to install all dependencies.
