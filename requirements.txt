@@ -1,0 +1,12 @@
+jupyter-client==6.1.6
+jupyter-core==4.6.3
+matplot==0.1.9
+matplotlib==3.2.0
+numpy==1.18.1
+opencv-python==4.2.0.34
+pydot==1.4.1
+pyparsing==2.4.6
+slidingwindow==0.0.13
+tensorboard==1.15.0
+tensorflow-estimator==1.15.1
+tensorflow-gpu==1.15.0
