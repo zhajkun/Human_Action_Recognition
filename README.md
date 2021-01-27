@@ -7,7 +7,7 @@ The following code is based on Python 3.6.8, and TensorFlow 1.15.
 1. Fisrt, you need to intall tf-pose-estimation. This is a OpenPose implemented using Tensorflow.<br>
 https://github.com/ildoonet/tf-pose-estimation
 2. Clone this repository to your local PC.
-3. Run requirements.txt to install all libraries.
+3. Run requirements.txt to install all dependencies.
 4. Download and unzip datasets:<br>
 The own recorded dataset:<br>
 NTU RGB+D dataset:<br>
