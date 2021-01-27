@@ -120,13 +120,15 @@ def predict_action_class(human_ids, statu_list, features_p, features_v, network)
             down_0 = velocity_temp
             down_1 = velocity_temp
         
-            prediction_int = network.predict([up_0, up_1, down_0, down_1])
+            prediction_vector = network.predict([up_0, up_1, down_0, down_1])
 
             prediction_int = np.ndarray.tolist(prediction_int)
             
             human_id = human_ids[idx]
 
-            prediction.update({human_id:prediction_int[0]})  
+            prediction_list = prediction_vector[0].tolist()
+
+            prediction.update({human_id:prediction_list})  
             
     return prediction       
 
@@ -234,7 +236,6 @@ def main_function():
             uti_images_io.draw_result_images(image_display, human_ids, skeletons_tracked_lists, result_dict, scale_h, ACTION_CLASSES)
 
         cv2.imwrite(TEST_IMAGES_FOLDER + sImage_Name, image_display)
-
         Images_Displayer.display(image_display)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):

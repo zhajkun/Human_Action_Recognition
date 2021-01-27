@@ -98,7 +98,7 @@ def shared_stream(x_shape):
     conv1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(inputs)
 
-    # conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
+    conv1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(conv1)
 
     conv2 = tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='valid',
                    use_bias=use_bias)(conv1)
@@ -150,10 +150,12 @@ def model():
     up_feature_1 = tf.keras.layers.Flatten()(up_feature_1)
     down_feature_0 = tf.keras.layers.Flatten()(down_feature_0)
     down_feature_1 = tf.keras.layers.Flatten()(down_feature_1)
-
+    
+    # only use the maximun features for the next layer
     up_feature = tf.keras.layers.Maximum()([up_feature_0, up_feature_1])
     down_feature = tf.keras.layers.Maximum()([down_feature_0, down_feature_1])
-
+   
+    # concate the features from position and velocity
     feature = tf.keras.layers.concatenate([up_feature, down_feature])
 
     fc_1 = tf.keras.layers.Dense(units=256, activation='relu', use_bias=True, kernel_regularizer=l2(0.001))(feature)
@@ -256,7 +258,7 @@ def train_model_on_batch_v1(network):
                 
                 # test_result = network.evaluate([tst_up_0, tst_up_1, tst_down_0, tst_down_1], tst_labels_0)
 
-
+                
                 tst_loss_list.append(tst_loss[0])
                 tst_accuracy_list.append(tst_loss[1])
             tst_accuracy = sum(tst_accuracy_list) / len(tst_accuracy_list)
@@ -298,6 +300,7 @@ def train_model_on_batch_v1(network):
     plt.savefig(FIGURE_PATH + '35frame_test_cc.png')
 
 if __name__ == '__main__':
+    # start to train the network, change the input shape of network via config/config.json
     time_start = time.time()
     network = model()
     train_model_on_batch_v1(network)
