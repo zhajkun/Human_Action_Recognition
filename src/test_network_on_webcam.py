@@ -120,17 +120,15 @@ def predict_action_class(human_ids, statu_list, features_p, features_v, network)
             down_0 = velocity_temp
             down_1 = velocity_temp
         
-            prediction_vector = network.predict([up_0, up_1, down_0, down_1])
+            prediction_int = network.predict([up_0, up_1, down_0, down_1])
 
             prediction_int = np.ndarray.tolist(prediction_int)
             
             human_id = human_ids[idx]
 
-            prediction_list = prediction_vector[0].tolist()
-
-            prediction.update({human_id:prediction_list})  
+            prediction.update({human_id:prediction_int[0]})  
             
-    return prediction       
+    return prediction           
 
 def convert_actionlabel_from_int_to_string(prediction, ACTION_CLASSES):
     ''' Argument:
