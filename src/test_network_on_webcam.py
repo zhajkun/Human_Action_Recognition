@@ -103,7 +103,7 @@ def predict_action_class(human_ids, statu_list, features_p, features_v, network)
 
         Returns:
         predition {dict}: predicted action class of possible valid humans, format {humans_id: action_class_label(str)}
-    '''    
+    '''
     prediction = {}
 
     for idx, statu in enumerate(statu_list):
@@ -120,17 +120,15 @@ def predict_action_class(human_ids, statu_list, features_p, features_v, network)
             down_0 = velocity_temp
             down_1 = velocity_temp
         
-            prediction_vector = network.predict([up_0, up_1, down_0, down_1])
+            prediction_int = network.predict([up_0, up_1, down_0, down_1])
 
             prediction_int = np.ndarray.tolist(prediction_int)
             
             human_id = human_ids[idx]
 
-            prediction_list = prediction_vector[0].tolist()
-
-            prediction.update({human_id:prediction_list})  
+            prediction.update({human_id:prediction_int[0]})  
             
-    return prediction       
+    return prediction         
 
 def convert_actionlabel_from_int_to_string(prediction, ACTION_CLASSES):
     ''' Argument:
@@ -152,8 +150,8 @@ def main_function():
 
     # select the data source
     # images_loader = uti_images_io.Read_Images_From_Video(VIDEO_PATH_SRC)
-    images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
-    # images_loader = uti_images_io.Read_Images_From_Folder(IMAGE_PATH)
+    # images_loader = uti_images_io.Read_Images_From_Webcam(10, 0)
+    images_loader = uti_images_io.Read_Images_From_Folder(IMAGE_PATH)
     # initialize the skeleton detector   
     Images_Displayer = uti_images_io.Image_Displayer()
     
