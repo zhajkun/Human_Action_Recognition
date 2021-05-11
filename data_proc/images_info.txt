@@ -1,0 +1,7 @@
+There are 38155 skeleton data. 
+They are saved to c:\Users\Kun\tf_test\Human_Action_Recognition\src/../data_proc/Data_Skeletons/all_detected_skeletons.npz 
+    PUTINBASKET: 5454 
+    SITTING: 8642 
+    STANDING: 12417 
+    WALKING: 7260 
+    WAVING: 4382 

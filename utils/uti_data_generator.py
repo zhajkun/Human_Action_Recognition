@@ -88,7 +88,6 @@ class Data_Generator(object):
         file_cursors = np.arange(self._batch_size, data_sum, self._batch_size)
         if 0 == file_remainder:
             file_cursors = np.arange(self._batch_size, data_sum+1, self._batch_size) 
-
         batch_output_cursors.append(list(range(0, file_cursors[0])))
         for integer_index in range(1, file_integer):
             batch_output_cursors.append(list(range(file_cursors[integer_index - 1], file_cursors[integer_index])))

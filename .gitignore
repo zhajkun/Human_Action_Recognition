@@ -13,7 +13,7 @@ iRobeka_Actions/*
 config/*
 .vscode/*
 
-*.txt
+
 *.png
 *.jpg
 *.pickle

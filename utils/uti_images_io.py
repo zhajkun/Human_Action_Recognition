@@ -341,7 +341,7 @@ def draw_scores_for_one_person_on_image(images, scores):
 
     for i in range(0, len(ACTION_CLASSES)):
 
-        FONT_SIZE = 0.3
+        FONT_SIZE = 0.8
         TXT_X = 20
         TXT_Y = 150 + i*30
         COLOR_INTENSITY = 255
@@ -349,11 +349,12 @@ def draw_scores_for_one_person_on_image(images, scores):
 
         label = ACTION_CLASSES[i]
         s = "{:<5}: {:.2f}".format(label, scores[i])
+        # high light the highes scores
         COLOR_INTENSITY *= (0.0 + 1.0 * scores[i])**0.5
 
         cv2.putText(images, text=s, org=(TXT_X, TXT_Y),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=FONT_SIZE,
-                    color=(0, int(COLOR_INTENSITY), 0), thickness=1)
+                    color=(0, int(COLOR_INTENSITY), 0), thickness=2)
 
 def draw_bounding_box_for_one_person_on_image(image_src, skeleton_src):
     '''
