@@ -138,3 +138,5 @@ def main_function():
 # Main function, defaul to read images from web camera
 if __name__ == '__main__':
     main_function() 
+
+    # test branch and merge
