@@ -10,6 +10,8 @@ utils\__pycache__/*
 test_outputs/*
 training_infos/*
 iRobeka_Actions/*
+config/*
+.vscode/*
 
 *.txt
 *.png
