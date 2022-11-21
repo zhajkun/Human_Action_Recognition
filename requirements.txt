@@ -9,4 +9,4 @@ pyparsing==2.4.6
 slidingwindow==0.0.13
 tensorboard==1.15.0
 tensorflow-estimator==1.15.1
-tensorflow-gpu==1.15.0
+tensorflow-gpu==2.9.3
